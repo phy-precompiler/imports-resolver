@@ -10,18 +10,19 @@ from ._core import resolve_entry_file
 
 
 @click.group()
-def cli():
+def phy():
     """ resolve imports """
     pass
 
 
-@cli.command()
+@phy.command()
 @click.option('-f', '--file', type=click.Path(exists=True), help='Path to the entry code file')
-def cli_resolve_entry_file(file: Path):
+def resolve_imports(file: Path):
     """ resolve imports from entry code file """
-    resolved_result = resolve_entry_file(file.resolve())
+    entry_file_path = Path(file).resolve()
+    resolved_result = resolve_entry_file(entry_file_path)
     click.echo(json.dumps(resolved_result, indent=4))
 
 
 if __name__ == '__main__':
-    cli()
+    phy()

@@ -13,7 +13,7 @@ dependencies = [
 
 
 [project.scripts]
-colorstream-crawler = 'phy_imports_resolver.__main__:cli'
+phy = 'phy_imports_resolver.__main__:phy'
 
 
 [tool.poetry]
