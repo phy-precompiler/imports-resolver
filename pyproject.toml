@@ -11,6 +11,11 @@ dependencies = [
     "click>=8.1.8",
 ]
 
+
+[project.scripts]
+colorstream-crawler = 'phy_imports_resolver.__main__:cli'
+
+
 [tool.poetry]
 packages = [{include = "phy_imports_resolver", from = "src"}]
 
