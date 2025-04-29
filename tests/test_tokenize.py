@@ -4,7 +4,7 @@
 from pathlib import Path
 from pprint import pprint
 
-from phy_imports_resolver.extractor import Tokenizer
+from phy_imports_resolver.phy_core import Tokenizer
 
 
 # constants
