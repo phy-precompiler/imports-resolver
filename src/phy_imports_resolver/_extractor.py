@@ -29,15 +29,11 @@ class _Parser:
             return builtin_ast.parse(_f.read(), filename=str(file))
 
 
-# typings
-ImportAstNode = Union[builtin_ast.Import, builtin_ast.ImportFrom]
-
-
 # TODO: use `phy-core` visitor
 class _Visitor(builtin_ast.NodeVisitor):
 
     # instance attributes
-    import_ast_nodes: List[ImportAstNode]
+    import_ast_nodes: List[Union[builtin_ast.Import, builtin_ast.ImportFrom]]
 
     def __init__(self):
         """ constructor """
@@ -55,7 +51,7 @@ class _Visitor(builtin_ast.NodeVisitor):
         self.generic_visit(node)
 
 
-def extract_import_ast_nodes(file: Path) -> List[ImportAstNode]:
+def extract_import_ast_nodes(file: Path) -> List[Union[builtin_ast.Import, builtin_ast.ImportFrom]]:
     """ extract import ast node from code """
     parser = _Parser()
     ast_root = parser.parse(file)
