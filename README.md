@@ -15,3 +15,9 @@ generate a helper parser for import statement:
 ```shell
 python -m pegen tests/imports.gram -o tests/imports_parser.py
 ```
+
+
+run all test:
+```shell
+poetry run pytest -s
+```
