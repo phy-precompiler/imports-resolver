@@ -57,4 +57,5 @@ def extract_import_ast_nodes(file: Path) -> List[Union[builtin_ast.Import, built
     ast_root = parser.parse(file)
     
     visitor = _Visitor()
-    return visitor.visit(ast_root)
+    visitor.visit(ast_root)
+    return visitor.import_ast_nodes
