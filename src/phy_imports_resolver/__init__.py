@@ -8,4 +8,4 @@ __all__ = [
 
 
 # imports
-from .core import resolve_entry_file
+from ._resolve_import import resolve_entry_file

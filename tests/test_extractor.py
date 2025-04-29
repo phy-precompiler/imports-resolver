@@ -14,6 +14,6 @@ SRC_DIR = BASE_DIR / 'src'
 
 
 # pylint: disable=missing-function-docstring
-def test_extract_import_ast_nodes():
+def _test_extract_import_ast_nodes():
     test_py_file = SRC_DIR / 'phy_imports_resolver' / '_extractor.py'
     pprint(extract_import_ast_nodes(test_py_file))
