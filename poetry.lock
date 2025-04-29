@@ -216,6 +216,25 @@ files = [
 ]
 
 [[package]]
+name = "pegen"
+version = "0.3.0"
+description = "CPython's PEG parser generator"
+optional = false
+python-versions = "<4,>=3.8"
+groups = ["dev"]
+files = [
+    {file = "pegen-0.3.0-py3-none-any.whl", hash = "sha256:69253c196ea425828a6ca01cec1aadca415cd5c789b4d00d653962234497071a"},
+    {file = "pegen-0.3.0.tar.gz", hash = "sha256:8cb30cee508a95c573aa256ed2cfa80ef8f561b90264c70e7de5afc50b4ac87d"},
+]
+
+[package.extras]
+docs = ["furo", "sphinx", "sphinx-copybutton"]
+lint = ["black", "flake8", "mypy"]
+memory = ["psutil"]
+test = ["pytest", "pytest-cov"]
+web = ["flask", "flask-wtf"]
+
+[[package]]
 name = "pluggy"
 version = "1.5.0"
 description = "plugin and hook calling mechanisms for python"
@@ -306,5 +325,5 @@ zstd = ["zstandard (>=0.18.0)"]
 
 [metadata]
 lock-version = "2.1"
-python-versions = ">=3.12"
-content-hash = "d302d52f780b8b459baac15d8227c2de5bac9df08abc49d3a1b7c5e7de45ecd3"
+python-versions = ">=3.12,<4"
+content-hash = "70002c252241b83e5350aaa2ab550bbcc2d95c6952e5351b1bb7e00f71f58aee"

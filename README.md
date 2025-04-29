@@ -8,3 +8,10 @@ install production + development dependencies:
 ```shell
 poetry install --with dev
 ```
+
+
+generate a helper parser for import statement:
+
+```shell
+python -m pegen tests/imports.gram -o tests/imports_parser.py
+```
