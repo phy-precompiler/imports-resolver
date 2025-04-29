@@ -109,6 +109,16 @@ class BaseParser:
         """ constructor; alway use shorthand `toknzer` to distingush from builtin `tokenize` module """
         self._toknzer = toknzer
 
+    # shorthand methods for `_toknzer`
+    @property
+    def mark(self) -> Tokenizer.Mark:
+        """ shorthand for `_toknzer.mark` """
+        return self._toknzer.mark
+    
+    def reset(self, to_index: Tokenizer.Mark) -> None:
+        """ shorthand for `_toknzer.reset` """
+        return self._toknzer.reset(to_index)
+
     @abstractmethod
     def start(self) -> Any:
         """ expected grammar entry point """
