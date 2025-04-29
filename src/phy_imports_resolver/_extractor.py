@@ -1,18 +1,10 @@
-""" extract import ast node from code. """
+""" extract import ast node from code """
 # imports
-import ast as builtin_ast
-from enum import Enum
 from pathlib import Path
+import ast as builtin_ast
 import token as builtin_token
 import tokenize as builtin_tokenize
 from typing import List, Union
-from pprint import pprint
-
-
-class ImportGrammer(Enum):
-    """ enum for import statement grammer rule """
-    IMPORT_NAME = 0
-    IMPORT_FROM = 1
 
 
 # TODO: use `phy-core` ast node
@@ -37,11 +29,15 @@ class _Parser:
             return builtin_ast.parse(_f.read(), filename=str(file))
 
 
+# typings
+ImportAstNode = Union[builtin_ast.Import, builtin_ast.ImportFrom]
+
+
 # TODO: use `phy-core` visitor
 class _Visitor(builtin_ast.NodeVisitor):
 
     # instance attributes
-    import_ast_nodes: List[Union[builtin_ast.Import, builtin_ast.ImportFrom]]
+    import_ast_nodes: List[ImportAstNode]
 
     def __init__(self):
         """ constructor """
@@ -59,12 +55,10 @@ class _Visitor(builtin_ast.NodeVisitor):
         self.generic_visit(node)
 
 
-if __name__ == '__main__':
-    _file = Path(__file__).parent.resolve() / 'extractor.py'
-    _parser = _Parser()
-
-    _ast_root = _parser.parse(_file)
-    _visitor = _Visitor()
-    _visitor.visit(_ast_root)
-
-    pprint(_visitor.import_ast_nodes)
+def extract_import_ast_nodes(file: Path) -> List[ImportAstNode]:
+    """ extract import ast node from code """
+    parser = _Parser()
+    ast_root = parser.parse(file)
+    
+    visitor = _Visitor()
+    return visitor.visit(ast_root)
