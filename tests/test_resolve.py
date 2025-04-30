@@ -35,7 +35,7 @@ def test_resolve_file():
 def test_resolve_pypi_package_module():
 
     files_to_parse: List[Tuple[str, str]] = [
-        (r'tmp\httpx\httpx\__init__.py', r'tmp\httpx\httpx'),
+        (r'tmp\tomlkit\tomlkit\__init__.py', r'tmp\tomlkit'),
     ]
 
     for _file_name, _find_dir_name in files_to_parse:
@@ -46,4 +46,5 @@ def test_resolve_pypi_package_module():
         )
         
         xml_format_result = print_xml_formatted_import_tree(parsed_result)
-        print(xml_format_result)
+        with open(BASE_DIR / _find_dir_name / 'imports_path.xml', 'w+', encoding='utf8') as _f:
+            _f.write(xml_format_result)

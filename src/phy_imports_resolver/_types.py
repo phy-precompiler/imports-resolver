@@ -41,4 +41,4 @@ def print_xml_formatted_import_tree(import_tree: ImportPathNode) -> str:
     
     root_element = _node_to_xml(import_tree, True, doc=doc, entry_path=entry_path)
     doc.appendChild(root_element)
-    return doc.toprettyxml(indent='\t')
+    return doc.toprettyxml(indent=' '* 2)  # two spaces as indent

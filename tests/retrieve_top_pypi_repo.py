@@ -53,7 +53,7 @@ def clone_repo(package_name: str, repo_url: str) -> Optional[Path]:
 
 # pylint: disable=missing-function-docstring
 def main():
-    for package_name in retrieve_top_pypi_packages(16, n=100):
+    for package_name in retrieve_top_pypi_packages(32, n=100):
         repo_url = get_repo_url(package_name)
 
         if repo_url:
