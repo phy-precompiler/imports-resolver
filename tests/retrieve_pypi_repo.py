@@ -70,4 +70,5 @@ def main():
 if __name__ == '__main__':
     # main()
     # clone_repo('pandas', repo_url='https://github.com/pandas-dev/pandas')
-    clone_repo('django', repo_url='https://github.com/django/django')
+    # clone_repo('django', repo_url='https://github.com/django/django')
+    clone_repo('numpy', repo_url='https://github.com/numpy/numpy')

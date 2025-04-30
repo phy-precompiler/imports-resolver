@@ -36,7 +36,8 @@ def test_resolve_pypi_package_module():
 
     files_to_parse: List[Tuple[str, str]] = [
         # (r'tmp\pandas\pandas\__init__.py', r'tmp\pandas'),
-        (r'tmp\django\django\__init__.py', r'tmp\django'),
+        # (r'tmp\django\django\__init__.py', r'tmp\django'),
+        (r'tmp\numpy\numpy\__init__.py', r'tmp\numpy\numpy'),
     ]
 
     for _file_name, _find_dir_name in files_to_parse:

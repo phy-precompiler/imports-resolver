@@ -6,7 +6,7 @@ import json
 import click
 
 # local imports
-from .core import resolve_entry_file
+from . import resolve_entry_file
 
 
 @click.group()
