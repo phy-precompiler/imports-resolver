@@ -9,7 +9,8 @@ from pprint import pprint
 import pytest
 
 # local imports
-from phy_imports_resolver._resolve_import import _resolve_import_name, resolve_entry_file
+from phy_imports_resolver._resolve_import import _resolve_import_name
+from phy_imports_resolver import resolve_entry_file, print_xml_formatted_import_tree
 
 
 # constants
@@ -43,4 +44,6 @@ def test_resolve_pypi_package_module():
             file_to_parse,
             find_path= BASE_DIR / _find_dir_name
         )
-        pprint(parsed_result)
+        
+        xml_format_result = print_xml_formatted_import_tree(parsed_result)
+        print(xml_format_result)
