@@ -10,13 +10,13 @@ from ._extractor import extract_import_ast_nodes
 
 
 # typings
-class ImportPathTree(TypedDict):
-    """ json schema for import path tree """
+class ImportPathNode(TypedDict):
+    """ json schema for import path tree node """
     path: str
-    imports: List['ImportPathTree']
+    imports: List['ImportPathNode']
 
 
-def resolve_import_name(
+def _resolve_import_name(
     import_name: str,
     find_path: Path, 
     include_suffixes: Tuple[str, ...] = ('.py', '.pyi')  # TODO: replace to ('.phy', ) when release
@@ -52,7 +52,7 @@ def resolve_import_name(
     return None
 
 
-def resolve_import_node(
+def _resolve_import_node(
     ast_node: Union[builtin_ast.Import, builtin_ast.ImportFrom], 
     module_path: Path,  # the module from which the ast node is produced
     find_path: Path, 
@@ -67,7 +67,7 @@ def resolve_import_node(
         for dotted_as_name in ast_node.names:
             # dotted_name: dotted_name '.' NAME | NAME
             dotted_name = dotted_as_name.name
-            import_path = resolve_import_name(
+            import_path = _resolve_import_name(
                 dotted_name,
                 find_path=find_path,
                 include_suffixes=include_suffixes
@@ -84,7 +84,7 @@ def resolve_import_node(
 
         # level = 0: 'from' dotted_name 'import' import_from_targets 
         if not from_level:
-            import_path = resolve_import_name(
+            import_path = _resolve_import_name(
                 ast_node.module,
                 find_path=find_path,
                 include_suffixes=include_suffixes
@@ -100,7 +100,7 @@ def resolve_import_node(
                 module_find_path = module_find_path.parent
                 from_level -= 1
 
-            import_path = resolve_import_name(
+            import_path = _resolve_import_name(
                 ast_node.module,
                 find_path=module_find_path,
                 include_suffixes=include_suffixes
@@ -117,7 +117,7 @@ def resolve_entry_file(entry_file: Path, find_path: Path = None):
     entry_file = entry_file.resolve()
     resolved_files: Set[Path] = set()
 
-    def _resolve_file(_file: Path, find_path=find_path) -> Optional[ImportPathTree]:
+    def _resolve_file(_file: Path, find_path=find_path) -> Optional[ImportPathNode]:
         _file = _file.resolve()
         if not _file.exists():
             return None
@@ -133,7 +133,7 @@ def resolve_entry_file(entry_file: Path, find_path: Path = None):
         resolved_files.add(_file)
 
         # resolve import path, recursively
-        _import_path_tree: ImportPathTree = {
+        _import_path_tree: ImportPathNode = {
             'path': str(_file),
             'imports': []
         }
@@ -141,11 +141,15 @@ def resolve_entry_file(entry_file: Path, find_path: Path = None):
         import_ast_nodes = extract_import_ast_nodes(_file)
         
         for _ast_node in import_ast_nodes:
-            resolved_imports_path_list = resolve_import_node(_ast_node, _file, find_path)
+            resolved_imports_path_list = _resolve_import_node(
+                _ast_node, 
+                _file, 
+                find_path
+            )
 
             # resolve recursively
             for resolved_path in resolved_imports_path_list:
-                if _import_path_node := _resolve_file(resolved_path):
+                if _import_path_node := _resolve_file(resolved_path, find_path=find_path):
                     _import_path_tree['imports'].append(_import_path_node)
 
         return _import_path_tree

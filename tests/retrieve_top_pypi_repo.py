@@ -41,12 +41,12 @@ def clone_repo(package_name: str, repo_url: str) -> Optional[Path]:
 
         if not repo_url.endswith('.git'):
             repo_url += '.git'
-            clone_to_dir = REPO_DIR / package_name
 
-            if not clone_to_dir.exists():
-                git.Repo.clone_from(repo_url, clone_to_dir)
+        clone_to_dir = REPO_DIR / package_name
+        if not clone_to_dir.exists():
+            git.Repo.clone_from(repo_url, clone_to_dir)
 
-            return clone_to_dir
+        return clone_to_dir
 
     return None
 
