@@ -5,8 +5,9 @@ __version__ = "0.1.0"
 __all__ = [
     'resolve_entry_file',
     'resolve_entry_package',
+    'ImportPathNode',
 ]
 
 
 # imports
-from ._resolve_import import resolve_entry_file, resolve_entry_package
+from ._resolve_import import resolve_entry_file, resolve_entry_package, ImportPathNode
