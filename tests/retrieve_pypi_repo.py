@@ -33,8 +33,14 @@ def retrieve_top_pypi_packages(sample_n: int = 16, n: int = None) -> List[str]:
     return random.sample([row['project'] for row in top_n_data], sample_n)
 
 
-def clone_repo(package_name: str, repo_url: str) -> Optional[Path]:
+def clone_repo(package_name: str, repo_url: str = None) -> Optional[Path]:
     """ clone git repository to tmp directory """
+    if not repo_url:
+        repo_url = get_repo_url(package_name)
+        
+        if repo_url is None:
+            return None
+
     if repo_url.startswith('https://github.com'):
         if repo_url.endswith('/'):
             repo_url.removesuffix('/')
@@ -62,4 +68,6 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    # main()
+    # clone_repo('pandas', repo_url='https://github.com/pandas-dev/pandas')
+    clone_repo('django', repo_url='https://github.com/django/django')

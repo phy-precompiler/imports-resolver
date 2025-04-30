@@ -94,11 +94,22 @@ def _resolve_import_node(
                 module_find_path = module_find_path.parent
                 from_level -= 1
 
-            import_path = _resolve_import_name(
-                ast_node.module,
-                find_path=module_find_path,
-                include_suffixes=include_suffixes
-            )
+            # `ast_node.module is None` means case of `from .|.. import`
+            if ast_node.module is None:
+                import_path = None
+
+                for _suffix in include_suffixes:
+                    dunder_init_file = module_find_path / ('__init__' + _suffix)
+                    if dunder_init_file.exists() and dunder_init_file.is_file():
+                        import_path = dunder_init_file.resolve()
+                        break
+                
+            else:
+                import_path = _resolve_import_name(
+                    ast_node.module,
+                    find_path=module_find_path,
+                    include_suffixes=include_suffixes
+                )
 
             if import_path is not None:
                 imports_path_list.append(import_path)
