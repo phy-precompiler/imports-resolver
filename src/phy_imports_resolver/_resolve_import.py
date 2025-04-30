@@ -112,9 +112,12 @@ def _resolve_import_node(
     return imports_path_list
 
 
-def resolve_entry_file(entry_file: Path, find_path: Path = None):
+def resolve_entry_file(entry_file: Path, find_path: Path = None) -> ImportPathNode:
     """ resolve dependent code files starting from given entry code file """
     entry_file = entry_file.resolve()
+    if not (entry_file.exists() and entry_file.is_file()):
+        raise FileNotFoundError(str(entry_file))
+    
     resolved_files: Set[Path] = set()
 
     def _resolve_file(_file: Path, find_path=find_path) -> Optional[ImportPathNode]:
@@ -156,3 +159,9 @@ def resolve_entry_file(entry_file: Path, find_path: Path = None):
 
     # start recursion
     return _resolve_file(entry_file)
+
+
+def resolve_entry_package(entry_package: Path, find_path: Path = None) -> ImportPathNode:
+    """ regard the `__init__.py` of the entry package as entry file """
+    entry_file = (entry_package / '__init__.py').resolve()
+    return resolve_entry_file(entry_file, find_path=find_path)
