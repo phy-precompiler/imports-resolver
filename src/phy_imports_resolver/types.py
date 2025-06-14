@@ -106,13 +106,14 @@ class ModuleImportsNode:
         """ represent the ast node as xml-like node """
         # use relative path to project directory to simplify the output
         simplified_path = self.path.relative_to(self.project_dir)
-        root = ET.Element(self.name, path=str(simplified_path))
+        root = ET.Element('module', name=self.name, path=str(simplified_path))
         
-        imports_et = ET.Element('imports')
-        for import_node in self.imports:
-            imports_et.append(import_node.repr_element())
-        
-        root.append(imports_et)
+        if self.imports:
+            imports_et = ET.Element('imports')
+            for import_node in self.imports:
+                imports_et.append(import_node.repr_element())
+            root.append(imports_et)
+
         return root
     
     def _stringify_repr_element(self) -> str:
@@ -132,13 +133,37 @@ class ModuleImportsNode:
         return self._stringify_repr_element()
 
 
+# pylint: disable=useless-parent-delegation
 @dataclass
 class FileModuleImportsNode(ModuleImportsNode):
     """ module of single file with dependent imports info """
     mod: ModuleFile
 
+    def repr_element(self) -> ET.Element:
+        root = super().repr_element()
+        root.tag = 'file'
+        return root
+    
+    def __str__(self):
+        return super().__str__()
+    
+    def __repr__(self):
+        return super().__repr__()
 
+
+# pylint: disable=useless-parent-delegation
 @dataclass
 class PackageModuleImportsNode(ModuleImportsNode):
     """ module of single file with dependent imports info """
     mod: ModulePackage
+
+    def repr_element(self) -> ET.Element:
+        root = super().repr_element()
+        root.tag = 'package'
+        return root
+    
+    def __str__(self):
+        return super().__str__()
+    
+    def __repr__(self):
+        return super().__repr__()

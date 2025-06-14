@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Tuple, Optional, Union, List, Set
 
 # local imports
-from phy_imports_resolver._extractor import extract_import_ast_nodes, ImportUnionAst
+from ._extractor import extract_import_ast_nodes, ImportUnionAst
 from phy_imports_resolver._types import ImportPathNode, EntryModNode, FileModNode, PackagesModNode
 
 

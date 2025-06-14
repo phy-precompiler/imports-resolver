@@ -26,7 +26,11 @@ def test_resolve_import_name():
 def test_resolve_file():
     entry_file = SRC_DIR / 'phy_imports_resolver' / '_resolver.py'
     resolver = ImportResolver(project_dir=SRC_DIR)
-    print(resolver.start(entry_file))
+    result = resolver.start(entry_file)
+    
+    with open(TEST_OUTPUT_DIR / '_resolver.xml', 'w+', encoding='utf8') as _f:
+        _f.write(str(result))
+
 
 @pytest.mark.skip()
 def test_resolve_pypi_package_module():

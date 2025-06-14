@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Optional, List
 
 # local imports
-from phy_imports_resolver.types import SEARCH_FOR_SUFFIXES, Module, ModuleFile, ModulePackage, \
+from phy_imports_resolver.types import SEARCH_FOR_SUFFIXES, ModuleFile, ModulePackage, \
     ModuleImportsNode, FileModuleImportsNode, PackageModuleImportsNode
 
 
