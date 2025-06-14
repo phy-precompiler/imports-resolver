@@ -7,7 +7,7 @@ from typing import Tuple, Optional, Union, List, Set
 
 # local imports
 from phy_imports_resolver._extractor import extract_import_ast_nodes, ExtractedImportAst
-from phy_imports_resolver._types import ImportPathNode, EntryModNode
+from phy_imports_resolver._types import ImportPathNode, EntryModNode, FileModNode, PackagesModNode
 
 
 class ImportResolver:
@@ -52,20 +52,23 @@ class ImportResolver:
         for import_ast_node in import_ast_nodes:
             pass
 
-    def resolve_extracted_import_ast(self, ast_node: ExtractedImportAst):
+    def resolve_py_file(self, py_file: Path):
         """ resolve import ast node into path list of python module or package """
-        # `Import` ast node
-        if isinstance(ast_node, builtin_ast.Import):
-            self._resolve_import_ast(ast_node)
+        import_ast_nodes = extract_import_ast_nodes(py_file)
 
-        # `ImportFrom` ast node
-        elif isinstance(ast_node, builtin_ast.ImportFrom):
-            self._resolve_import_from_ast(ast_node)
+        for ast_node in import_ast_nodes:
+            # `Import` ast node
+            if isinstance(ast_node, builtin_ast.Import):
+                self._resolve_import_ast(ast_node, py_file)
 
-        else:  # will not enter this branch
-            pass
+            # `ImportFrom` ast node
+            elif isinstance(ast_node, builtin_ast.ImportFrom):
+                self._resolve_import_from_ast(ast_node, py_file)
 
-    def _resolve_import_name(self, import_name: str) -> Optional[Path]:
+            else:  # will not enter this branch
+                pass
+
+    def _resolve_import_name(self, import_name: str, module_path: Path) -> Optional[ImportPathNode]:
         """ Resolve import name into path of python module or package. 
 
         Argument `find_path` can be cwd, or other path that added to PYTHONPATH, but with stdlib path & 
@@ -81,41 +84,50 @@ class ImportResolver:
         # imported is package; return __init__ file path
         absolute_import_path = (self.project_dir / import_path).resolve()
         if absolute_import_path.exists() and absolute_import_path.is_dir():
-            for _suffix in self.include_suffixes:
-
-                dunder_init_file = absolute_import_path / ('__init__' + _suffix)
-                if dunder_init_file.exists() and dunder_init_file.is_file():
-                    return dunder_init_file
+            return PackagesModNode(
+                file_path=absolute_import_path,
+                project_dir=self.project_dir,
+                imports=[]
+            )
 
         # imported is file module
         for _suffix in self.include_suffixes:
             absolute_import_path = (self.project_dir / (import_path + _suffix)).resolve()
 
             if absolute_import_path.exists() and absolute_import_path.is_file():
-                return absolute_import_path
+                return FileModNode(
+                    file_path=absolute_import_path,
+                    project_dir=self.project_dir,
+                    imports=[]
+                )
 
         return None
 
-    def _resolve_import_ast(self, ast_node: builtin_ast.Import):
+    def _resolve_import_ast(self, ast_node: builtin_ast.Import, module_path: Path) -> List[Path]:
         """ 'import' ','.dotted_as_name+ """
+        imports_path_list = []
+
         for dotted_as_name in ast_node.names:
             # dotted_name: dotted_name '.' NAME | NAME
             dotted_name = dotted_as_name.name
-            import_path = self._resolve_import_name(dotted_name)
+            import_path = self._resolve_import_name(dotted_name, module_path)
 
             if import_path is not None:
                 imports_path_list.append(import_path)
 
-    def _resolve_import_from_ast(self, ast_node: builtin_ast.ImportFrom):
+        return imports_path_list
+
+    def _resolve_import_from_ast(self, ast_node: builtin_ast.ImportFrom, module_path: Path) -> List[Path]:
         """ import_from:
             | 'from' ('.' | '...')* dotted_name 'import' import_from_targets 
             | 'from' ('.' | '...')+ 'import' import_from_targets 
         """
+        imports_path_list = []
         from_level = ast_node.level
 
         # level = 0: 'from' dotted_name 'import' import_from_targets 
         if not from_level:
-            import_path = self._resolve_import_name(ast_node.module)
+            import_path = self._resolve_import_name(ast_node.module, module_path)
 
             if import_path is not None:
                 imports_path_list.append(import_path)
@@ -146,6 +158,8 @@ class ImportResolver:
 
             if import_path is not None:
                 imports_path_list.append(import_path)
+
+        return imports_path_list
 
 
 def _resolve_import_name(

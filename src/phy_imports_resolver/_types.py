@@ -1,10 +1,14 @@
 """ typings & related methods """
 # imports
 from dataclasses import dataclass
-from typing import List
+from typing import List, Tuple, Optional
 from pathlib import Path
 from xml.dom.minidom import Document
 import xml.etree.ElementTree as ET
+
+
+# constants
+include_suffixes: Tuple[str, ...] = ('.py', '.pyi')  # TODO: replace to ('.phy', ) when release
 
 
 @dataclass
@@ -58,9 +62,17 @@ class FileModNode(ImportPathNode):
 
 @dataclass
 class PackagesModNode(ImportPathNode):
-    """ python module as a package, with a "__init__.py" file """
-    pass
-
+    """ python module as a package, with a "__init__" file """
+    
+    @property
+    def dunder_init_path(self) -> Path:
+        """ `__init__` file of the package """
+        for _suffix in include_suffixes:
+            dunder_init_file = self.file_path / ('__init__' + _suffix)
+            if dunder_init_file.exists() and dunder_init_file.is_file():
+                return dunder_init_file
+            
+        raise FileNotFoundError(str(self.file_path))
 
 def print_xml_formatted_import_tree(import_tree: ImportPathNode) -> str:
     """ print import path tree as xml for a clear style """
