@@ -91,6 +91,7 @@ class ModuleImportsNode:
     project_dir: Path
 
     imports: List['ModuleImportsNode']  # DO NOT use `Self` for it is introduced until 3.11
+    code: Optional[str] = None  # import statement code
 
     @property
     def name(self) -> str:
@@ -107,6 +108,9 @@ class ModuleImportsNode:
         # use relative path to project directory to simplify the output
         simplified_path = self.path.relative_to(self.project_dir)
         root = ET.Element('module', name=self.name, path=str(simplified_path))
+
+        if self.code:
+            root.set('code', self.code)
         
         if self.imports:
             imports_et = ET.Element('imports')
