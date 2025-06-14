@@ -24,7 +24,7 @@ def test_resolve_import_name():
 
 # @pytest.mark.skip()
 def test_resolve_file():
-    entry_file = SRC_DIR / 'phy_imports_resolver' / '_resolver.py'
+    entry_file = SRC_DIR / 'phy_imports_resolver' / 'resolver.py'
     resolver = ImportResolver(project_dir=SRC_DIR)
     result = resolver.start(entry_file)
     

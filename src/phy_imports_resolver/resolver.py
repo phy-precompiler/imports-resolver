@@ -42,12 +42,10 @@ class ImportResolver:
 
         for _import_union_ast in mod_file.extract_import_ast():
             if isinstance(_import_union_ast, builtin_ast.Import):
-                if mod_imports_node := self._resolve_import_ast(_import_union_ast, mod_file):
-                    mod_imports_node_list.append(mod_imports_node)
+                mod_imports_node_list += self._resolve_import_ast(_import_union_ast, mod_file)
 
             elif isinstance(_import_union_ast, builtin_ast.ImportFrom):
-                if mod_imports_node :=  self._resolve_import_from_ast(_import_union_ast, mod_file):
-                    mod_imports_node_list.append(mod_imports_node)
+                mod_imports_node_list += self._resolve_import_from_ast(_import_union_ast, mod_file)
 
             else:
                 raise TypeError  # never occurs
@@ -75,15 +73,15 @@ class ImportResolver:
         else:
             raise FileNotFoundError(str(mod_pkg.path / '__init__.*'))
     
-            
     def _resolve_import_ast(
         self, 
         import_ast: builtin_ast.Import, 
         mod_file: ModuleFile,
         **kwargs
-    ) -> Optional[FileModuleImportsNode]:
+    ) -> List[FileModuleImportsNode]:
         """ 'import' ','.dotted_as_name+ """
         _ = kwargs
+        _ = mod_file
         _code = builtin_ast.unparse(builtin_ast.fix_missing_locations(import_ast))
 
         mod_imports_node_list: List[ModuleImportsNode] = []
@@ -97,12 +95,7 @@ class ImportResolver:
             if mod_imports_node := self._resolve_import_name(import_name, code=_code):
                 mod_imports_node_list.append(mod_imports_node)
 
-        return FileModuleImportsNode(
-            mod=mod_file, 
-            project_dir=self.project_dir, 
-            imports=mod_imports_node_list,
-            code=_code
-        )
+        return mod_imports_node_list
     
     def _resolve_import_from_ast(
         self, 
@@ -117,13 +110,14 @@ class ImportResolver:
         _ = kwargs
         _code = builtin_ast.unparse(builtin_ast.fix_missing_locations(import_from_ast))
 
+        mod_imports_node_list: List[ModuleImportsNode] = []
         from_level = import_from_ast.level
 
         # level = 0: 'from' dotted_name 'import' import_from_targets
         # No dot operator to resolve.
         if not from_level:
             if mod_imports_node := self._resolve_import_name(import_from_ast.module, code=_code):
-                return mod_imports_node
+                mod_imports_node_list.append(mod_imports_node)
 
         # level > 0
         else:
@@ -141,15 +135,17 @@ class ImportResolver:
             import_name = abs_import_path.stem
 
             if mod_package := ModulePackage.create_or_null(name=import_name, path=abs_import_path):
-                return self._resolve_mod_package(mod_package, code=_code)
+                if mod_imports_node := self._resolve_mod_package(mod_package, code=_code):
+                    mod_imports_node_list.append(mod_imports_node)
             
             # imported is file
             for _suffix in SEARCH_FOR_SUFFIXES:
                 abs_import_path = abs_import_path.with_suffix(_suffix).resolve()
                 if mod_file := ModuleFile.create_or_null(name=import_name, path=abs_import_path):
-                    return self._resolve_mod_file(mod_file, code=_code)
+                    if mod_imports_node :=  self._resolve_mod_file(mod_file, code=_code):
+                        mod_imports_node_list.append(mod_imports_node)
                 
-        return None
+        return mod_imports_node_list
     
     def _resolve_import_name(self, import_name: str, **kwargs) -> Optional[ModuleImportsNode]:
         """ Resolve import name for path of file module or package. 
