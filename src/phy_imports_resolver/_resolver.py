@@ -52,21 +52,39 @@ class ImportResolver:
         for import_ast_node in import_ast_nodes:
             pass
 
-    def resolve_py_file(self, py_file: Path):
+    def resolve_import_path_node(self, path_node: ImportPathNode):
         """ resolve import ast node into path list of python module or package """
-        import_ast_nodes = extract_import_ast_nodes(py_file)
+        _file: Path = None
 
-        for ast_node in import_ast_nodes:
+        if isinstance(path_node, EntryModNode):
+            _file = path_node.file_path
+
+        elif isinstance(path_node, FileModNode):
+            _file = path_node.file_path
+
+        elif isinstance(path_node, PackagesModNode):
+            _file = path_node.dunder_init_path
+
+        else:
+            raise TypeError
+
+        for ast_node in extract_import_ast_nodes(_file):
+            child_path_node = None
             # `Import` ast node
             if isinstance(ast_node, builtin_ast.Import):
-                self._resolve_import_ast(ast_node, py_file)
+                _child_path_node = self._resolve_import_ast(ast_node, _file)
+                child_path_node = self.resolve_import_path_node(_child_path_node)
 
             # `ImportFrom` ast node
             elif isinstance(ast_node, builtin_ast.ImportFrom):
-                self._resolve_import_from_ast(ast_node, py_file)
+                _child_path_node = self._resolve_import_from_ast(ast_node, _file)
+                child_path_node = self.resolve_import_path_node(_child_path_node)
 
-            else:  # will not enter this branch
-                pass
+            if child_path_node is not None:
+                path_node.imports.append(child_path_node)
+
+        return path_node
+
 
     def _resolve_import_name(self, import_name: str, module_path: Path) -> Optional[ImportPathNode]:
         """ Resolve import name into path of python module or package. 
