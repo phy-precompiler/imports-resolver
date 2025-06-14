@@ -1,7 +1,7 @@
 """ typings & related methods """
 # imports
 from dataclasses import dataclass
-from typing import List, TypedDict
+from typing import List
 from pathlib import Path
 from xml.dom.minidom import Document
 import xml.etree.ElementTree as ET
@@ -11,6 +11,12 @@ import xml.etree.ElementTree as ET
 class ImportPathNode:
     """ json schema for import path tree node """
     file_path: Path
+
+    # Project is the directory that look for python modules, it is usually the current work directory.
+    # It is essential for resolving imports; if imported module is outside of the project directory, it 
+    # will not be resolved and be regarded as site-packages.
+    project_dir: Path
+
     imports: List['ImportPathNode']  # DO NOT use `Self` for it is introduced until 3.11
 
     def repr_element(self) -> ET.Element:
@@ -36,11 +42,11 @@ class ImportPathNode:
         """ Both `__str__` & `__repr__` should be explicitly defined, or the subclass
         may call `object.__str__()` or `obejct.__repr__()`. """
         return self._stringify_repr_element()
-    
+
 
 @dataclass
-class ProjectNode(ImportPathNode):
-    """ project is the directory that look for python modules, it is usually the current work directory """
+class EntryModNode(ImportPathNode):
+    """ entry file as the root of imports tree """
     pass
 
 
