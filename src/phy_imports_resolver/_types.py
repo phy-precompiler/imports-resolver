@@ -1,14 +1,59 @@
 """ typings & related methods """
 # imports
+from dataclasses import dataclass
 from typing import List, TypedDict
 from pathlib import Path
 from xml.dom.minidom import Document
+import xml.etree.ElementTree as ET
 
 
-class ImportPathNode(TypedDict):
+@dataclass
+class ImportPathNode:
     """ json schema for import path tree node """
-    path: str
-    imports: List['ImportPathNode']
+    file_path: Path
+    imports: List['ImportPathNode']  # DO NOT use `Self` for it is introduced until 3.11
+
+    def repr_element(self) -> ET.Element:
+        """ represent the ast node as xml-like node """
+        root = ET.Element(self.__class__.__name__, path=str(self.file_path))
+        for import_node in self.imports:
+            root.append(import_node.repr_element())
+        
+        return root
+    
+    def _stringify_repr_element(self) -> str:
+        """ print element tree with indent xml-like format """
+        root = self.repr_element()
+        ET.indent(root, space=' ' * 2, level=0)
+        return ET.tostring(root, encoding='unicode', method='xml')
+    
+    def __str__(self) -> str:
+        """ Both `__str__` & `__repr__` should be explicitly defined, or the subclass
+        may call `object.__str__()` or `obejct.__repr__()`. """
+        return self._stringify_repr_element()
+
+    def __repr__(self):
+        """ Both `__str__` & `__repr__` should be explicitly defined, or the subclass
+        may call `object.__str__()` or `obejct.__repr__()`. """
+        return self._stringify_repr_element()
+    
+
+@dataclass
+class ProjectNode(ImportPathNode):
+    """ project is the directory that look for python modules, it is usually the current work directory """
+    pass
+
+
+@dataclass
+class FileModNode(ImportPathNode):
+    """ python module as a single ".py" file """
+    pass
+
+
+@dataclass
+class PackagesModNode(ImportPathNode):
+    """ python module as a package, with a "__init__.py" file """
+    pass
 
 
 def print_xml_formatted_import_tree(import_tree: ImportPathNode) -> str:
