@@ -77,10 +77,10 @@ class ImportResolver:
     
             
     def _resolve_import_ast(
-            self, 
-            import_ast: builtin_ast.Import, 
-            mod_file: ModuleFile,
-            **kwargs
+        self, 
+        import_ast: builtin_ast.Import, 
+        mod_file: ModuleFile,
+        **kwargs
     ) -> Optional[FileModuleImportsNode]:
         """ 'import' ','.dotted_as_name+ """
         _ = kwargs
@@ -89,7 +89,7 @@ class ImportResolver:
         mod_imports_node_list: List[ModuleImportsNode] = []
 
         # "import . <as ...>" & "import .<submod> <as...>" are illegal syntax, so in this case no need to care about
-        # resolve dot operator.
+        # resolving dot operator.
         for import_name_ast in import_ast.names:
             # dotted_name: dotted_name '.' NAME | NAME
             import_name = import_name_ast.name
@@ -105,10 +105,10 @@ class ImportResolver:
         )
     
     def _resolve_import_from_ast(
-            self, 
-            import_from_ast: builtin_ast.ImportFrom, 
-            mod_file: ModuleFile,
-            **kwargs
+        self, 
+        import_from_ast: builtin_ast.ImportFrom, 
+        mod_file: ModuleFile,
+        **kwargs
     ) -> Optional[FileModuleImportsNode]:
         """ import_from:
             | 'from' ('.' | '...')* dotted_name 'import' import_from_targets 
