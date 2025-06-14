@@ -5,6 +5,9 @@ from pathlib import Path
 import xml.etree.ElementTree as ET
 from typing import List, Tuple, Optional
 
+# local imports
+from phy_imports_resolver._extractor import extract_import_ast_nodes, ImportUnionAst
+
 
 # constants
 
@@ -23,6 +26,10 @@ class Module:
 @dataclass
 class ModuleFile(Module):
     """ module as single file, with file name the same as module name """
+
+    def extract_import_ast(self) -> List[ImportUnionAst]:
+        """ extract import ast node from module file """
+        return extract_import_ast_nodes(self.path)
     
     @classmethod
     def create_or_null(cls, name: str, path: Path) -> Optional['ModuleFile']:
@@ -74,7 +81,7 @@ class ModulePackage(Module):
 
 
 @dataclass
-class ImportPathNode:
+class ModuleImportsNode:
     """ module with dependent imports info """
     mod: Module
 
@@ -83,7 +90,7 @@ class ImportPathNode:
     # will not be resolved and be regarded as site-packages.
     project_dir: Path
 
-    imports: List['ImportPathNode']  # DO NOT use `Self` for it is introduced until 3.11
+    imports: List['ModuleImportsNode']  # DO NOT use `Self` for it is introduced until 3.11
 
     @property
     def name(self) -> str:
@@ -126,12 +133,12 @@ class ImportPathNode:
 
 
 @dataclass
-class FileModNode(ImportPathNode):
+class FileModuleImportsNode(ModuleImportsNode):
     """ module of single file with dependent imports info """
     mod: ModuleFile
 
 
 @dataclass
-class PackageModNode(ImportPathNode):
+class PackageModuleImportsNode(ModuleImportsNode):
     """ module of single file with dependent imports info """
     mod: ModulePackage
