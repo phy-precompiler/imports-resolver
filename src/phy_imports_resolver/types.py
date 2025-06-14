@@ -49,6 +49,7 @@ class ModuleFile(Module):
             return cls(name=name, path=path)
         raise FileNotFoundError(str(path))
     
+    # pylint: disable=useless-parent-delegation
     def __hash__(self):
         """ make hashable """
         return super().__hash__()
@@ -87,6 +88,7 @@ class ModulePackage(Module):
             return cls(name=name, path=path)
         raise FileNotFoundError(str(path))
     
+    # pylint: disable=useless-parent-delegation
     def __hash__(self):
         """ make hashable """
         return super().__hash__()
