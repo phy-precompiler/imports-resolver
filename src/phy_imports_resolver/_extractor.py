@@ -10,7 +10,7 @@ from typing import List, Union
 # TODO: use `phy-core` ast node
 _AstNode = builtin_ast.AST
 
-ImportAstNode = Union[builtin_ast.Import, builtin_ast.ImportFrom]
+ExtractedImportAst = Union[builtin_ast.Import, builtin_ast.ImportFrom]
 
 
 # TODO: use `phy-core` parser
@@ -32,10 +32,10 @@ class _Parser:
 
 
 # TODO: use `phy-core` visitor
-class _Visitor(builtin_ast.NodeVisitor):
+class _ImportAstVisitor(builtin_ast.NodeVisitor):
 
     # instance attributes
-    imported_ast_nodes: List[ImportAstNode]
+    imported_ast_nodes: List[ExtractedImportAst]
 
     def __init__(self):
         """ constructor """
@@ -53,11 +53,11 @@ class _Visitor(builtin_ast.NodeVisitor):
         self.generic_visit(node)
 
 
-def extract_import_ast_nodes(file: Path) -> List[ImportAstNode]:
+def extract_import_ast_nodes(file: Path) -> List[ExtractedImportAst]:
     """ extract import ast node from code """
     parser = _Parser()
     ast_root = parser.parse(file)
     
-    visitor = _Visitor()
+    visitor = _ImportAstVisitor()
     visitor.visit(ast_root)
     return visitor.imported_ast_nodes
