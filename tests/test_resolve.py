@@ -10,6 +10,7 @@ import pytest
 # local imports
 from phy_imports_resolver._resolver import _resolve_import_name
 from phy_imports_resolver import resolve_entry_file, print_xml_formatted_import_tree
+from phy_imports_resolver.resolver import ImportResolver
 
 from ._common import BASE_DIR, SRC_DIR, TEST_OUTPUT_DIR
 
@@ -21,12 +22,13 @@ def test_resolve_import_name():
     pprint(_resolve_import_name('phy_imports_resolver.submodule', SRC_DIR))
 
 
-@pytest.mark.skip()
-def test_resolve_file():
-    pprint(resolve_entry_file(SRC_DIR / 'phy_imports_resolver' / '_resolve_import.py'))
-
-
 # @pytest.mark.skip()
+def test_resolve_file():
+    entry_file = SRC_DIR / 'phy_imports_resolver' / '_resolver.py'
+    resolver = ImportResolver(project_dir=SRC_DIR)
+    print(resolver.start(entry_file))
+
+@pytest.mark.skip()
 def test_resolve_pypi_package_module():
 
     files_to_parse: List[Tuple[str, str]] = [

@@ -36,26 +36,23 @@ class ImportResolver:
         mod_file = ModuleFile.create_or_err(name=entry_file.stem, path=entry_file)
         return self._resolve_mod_file(mod_file)
 
-    def _resolve_mod(self, mod: Module) -> Optional[ModuleImportsNode]:
-        """ resolve imports of specified module """
-        if isinstance(mod, ModuleFile):
-            return self._resolve_mod_file(mod)
-        elif isinstance(mod, ModulePackage):
-            return self._resolve_mod_package(mod)
-        else:
-            raise TypeError  # never throws
-
     def _resolve_mod_file(self, mod_file: ModuleFile) -> Optional[FileModuleImportsNode]:
         """ resolve imports of specified module of file """
+        mod_imports_node_list: List[ModuleImportsNode] = []
+
         for _import_union_ast in mod_file.extract_import_ast():
             if isinstance(_import_union_ast, builtin_ast.Import):
-                pass
+                if mod_imports_node := self._resolve_import_ast(_import_union_ast, mod_file):
+                    mod_imports_node_list.append(mod_imports_node)
 
             elif isinstance(_import_union_ast, builtin_ast.ImportFrom):
-                pass
+                if mod_imports_node :=  self._resolve_import_from_ast(_import_union_ast, mod_file):
+                    mod_imports_node_list.append(mod_imports_node)
 
             else:
                 raise TypeError  # never occurs
+            
+        return FileModuleImportsNode(mod=mod_file, project_dir=self.project_dir, imports=mod_imports_node_list)
     
     def _resolve_mod_package(self, mod_pkg: ModulePackage) -> Optional[PackageModuleImportsNode]:
         """ Resolve imports of specified module of package. 
