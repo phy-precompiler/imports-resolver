@@ -8,7 +8,7 @@ from pprint import pprint
 import pytest
 
 # local imports
-from phy_imports_resolver._resolve_import import _resolve_import_name
+from phy_imports_resolver._resolver import _resolve_import_name
 from phy_imports_resolver import resolve_entry_file, print_xml_formatted_import_tree
 
 from ._common import BASE_DIR, SRC_DIR, TEST_OUTPUT_DIR

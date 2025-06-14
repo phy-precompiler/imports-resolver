@@ -6,7 +6,7 @@ import json
 import click
 
 # local imports
-from phy_imports_resolver._resolve_import import resolve_entry_file
+from phy_imports_resolver._resolver import resolve_entry_file
 
 
 @click.group()
