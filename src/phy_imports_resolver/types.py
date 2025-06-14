@@ -22,6 +22,10 @@ class Module:
     name: str
     path: Path
 
+    def __hash__(self):
+        """ make hashable """
+        return hash(self.path)
+
 
 @dataclass
 class ModuleFile(Module):
@@ -44,6 +48,10 @@ class ModuleFile(Module):
         if path.exists() and path.is_file():
             return cls(name=name, path=path)
         raise FileNotFoundError(str(path))
+    
+    def __hash__(self):
+        """ make hashable """
+        return super().__hash__()
 
 
 @dataclass
@@ -78,6 +86,10 @@ class ModulePackage(Module):
         if path.exists() and path.is_dir():
             return cls(name=name, path=path)
         raise FileNotFoundError(str(path))
+    
+    def __hash__(self):
+        """ make hashable """
+        return super().__hash__()
 
 
 @dataclass
@@ -89,7 +101,6 @@ class ModuleImportsNode:
     # It is essential for resolving imports; if imported module is outside of the project directory, it 
     # will not be resolved and be regarded as site-packages.
     project_dir: Path
-
     imports: List['ModuleImportsNode']  # DO NOT use `Self` for it is introduced until 3.11
     code: Optional[str] = None  # import statement code
 

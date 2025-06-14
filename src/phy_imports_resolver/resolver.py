@@ -3,10 +3,10 @@
 import os
 import ast as builtin_ast
 from pathlib import Path
-from typing import Optional, List
+from typing import Optional, List, Set
 
 # local imports
-from phy_imports_resolver.types import SEARCH_FOR_SUFFIXES, ModuleFile, ModulePackage, \
+from phy_imports_resolver.types import SEARCH_FOR_SUFFIXES, Module, ModuleFile, ModulePackage, \
     ModuleImportsNode, FileModuleImportsNode, PackageModuleImportsNode
 
 
@@ -15,6 +15,7 @@ class ImportResolver:
 
     # instance attributes
     project_dir: Path
+    resolved_mod: Set[Module]  # avoid circular imports
 
     def __init__(self, project_dir: Path = None):
         """ Init resolver with project directory. 
@@ -30,6 +31,7 @@ class ImportResolver:
             raise FileNotFoundError(str(project_dir))
 
         self.project_dir = project_dir
+        self.resolved_mod = set()
 
     def start(self, entry_file: Path) -> FileModuleImportsNode:
         """ entry file to start resolving """
@@ -38,6 +40,9 @@ class ImportResolver:
 
     def _resolve_mod_file(self, mod_file: ModuleFile, **kwargs) -> Optional[FileModuleImportsNode]:
         """ resolve imports of specified module of file """
+        if mod_file in self.resolved_mod:
+            return None
+
         mod_imports_node_list: List[ModuleImportsNode] = []
 
         for _import_union_ast in mod_file.extract_import_ast():
@@ -49,7 +54,8 @@ class ImportResolver:
 
             else:
                 raise TypeError  # never occurs
-            
+        
+        self.resolved_mod.add(mod_file)
         return FileModuleImportsNode(
             mod=mod_file, 
             project_dir=self.project_dir, 
@@ -63,9 +69,16 @@ class ImportResolver:
         The imports of package module is considered as those of its dunder init file. If the package is native namespace 
         package, it is the submodule that should not be resolved instead of the super package.
         """
+        if mod_pkg in self.resolved_mod:
+            return None
+
         if dunder_init_path := mod_pkg.dunder_init_path:
             # use package name as its dunder init file module name
             if mod_file := ModuleFile.create_or_null(name=mod_pkg.name, path=dunder_init_path):
+                if mod_file in self.resolved_mod:
+                    return None
+
+                self.resolved_mod.add(mod_file)
                 return PackageModuleImportsNode(
                     mod=mod_pkg,
                     project_dir=self.project_dir,
