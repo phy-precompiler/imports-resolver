@@ -11,5 +11,5 @@ __all__ = [
 
 
 # imports
-from ._resolve_import import resolve_entry_file, resolve_entry_package
-from ._types import ImportPathNode, print_xml_formatted_import_tree
+from phy_imports_resolver._resolve_import import resolve_entry_file, resolve_entry_package
+from phy_imports_resolver._types import ImportPathNode, print_xml_formatted_import_tree

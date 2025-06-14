@@ -6,8 +6,8 @@ from pathlib import Path
 from typing import Tuple, Optional, Union, List, Set
 
 # local imports
-from ._extractor import extract_import_ast_nodes
-from ._types import ImportPathNode
+from phy_imports_resolver._extractor import extract_import_ast_nodes
+from phy_imports_resolver._types import ImportPathNode
 
 
 def _resolve_import_name(
