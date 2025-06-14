@@ -63,15 +63,17 @@ class ImportResolver:
         The imports of package module is considered as those of its dunder init file. If the package is native namespace 
         package, it is the submodule that should not be resolved instead of the super package.
         """
-        if mod_file := mod_pkg.dunder_init_path:
-            return PackageModuleImportsNode(
-                mod=mod_pkg,
-                project_dir=self.project_dir,
-                imports=self._resolve_mod_file(mod_file, code=kwargs.get('code')),
-                code=kwargs.get('code')
-            )
-        else:
-            raise FileNotFoundError(str(mod_pkg.path / '__init__.*'))
+        if dunder_init_path := mod_pkg.dunder_init_path:
+            # use package name as its dunder init file module name
+            if mod_file := ModuleFile.create_or_null(name=mod_pkg.name, path=dunder_init_path):
+                return PackageModuleImportsNode(
+                    mod=mod_pkg,
+                    project_dir=self.project_dir,
+                    imports=self._resolve_mod_file(mod_file, code=kwargs.get('code')),
+                    code=kwargs.get('code')
+                )
+            
+        raise FileNotFoundError(str(mod_pkg.path / '__init__.*'))
     
     def _resolve_import_ast(
         self, 
