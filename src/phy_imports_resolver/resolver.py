@@ -3,15 +3,15 @@
 import os
 import ast as builtin_ast
 from pathlib import Path
-from typing import Tuple, Optional, Union, List, Set
+from typing import Optional, List
 
 # local imports
-from phy_imports_resolver._extractor import extract_import_ast_nodes, ImportUnionAst
 from phy_imports_resolver.types import SEARCH_FOR_SUFFIXES, Module, ModuleFile, ModulePackage, \
     ModuleImportsNode, FileModuleImportsNode, PackageModuleImportsNode
 
 
 class ImportResolver:
+    """ resolve importing chain from given entry code file, searching within given project path """
 
     # instance attributes
     project_dir: Path
@@ -77,13 +77,55 @@ class ImportResolver:
         """ 'import' ','.dotted_as_name+ """
         mod_imports_node_list: List[ModuleImportsNode] = []
 
-        for dotted_as_name in import_ast.names:
+        # "import . <as ...>" & "import .<submod> <as...>" are illegal syntax, so in this case no need to care about
+        # resolve dot operator.
+        for import_name_ast in import_ast.names:
             # dotted_name: dotted_name '.' NAME | NAME
-            dotted_name = dotted_as_name.name
-            if mod_imports_node := self._resolve_import_name(dotted_name):
+            import_name = import_name_ast.name
+
+            if mod_imports_node := self._resolve_import_name(import_name):
                 mod_imports_node_list.append(mod_imports_node)
 
         return FileModuleImportsNode(mod=mod_file, project_dir=self.project_dir, imports=mod_imports_node_list)
+    
+    def _resolve_import_from_ast(self, import_from_ast: builtin_ast.ImportFrom, mod_file: ModuleFile) -> Optional[FileModuleImportsNode]:
+        """ import_from:
+            | 'from' ('.' | '...')* dotted_name 'import' import_from_targets 
+            | 'from' ('.' | '...')+ 'import' import_from_targets 
+        """
+        from_level = import_from_ast.level
+
+        # level = 0: 'from' dotted_name 'import' import_from_targets
+        # No dot operator to resolve.
+        if not from_level:
+            if mod_imports_node := self._resolve_import_name(import_from_ast.module):
+                return mod_imports_node
+
+        # level > 0
+        else:
+            mod_path = mod_file.path
+            while from_level:
+                mod_path = mod_path.parent
+                from_level -= 1
+
+            # `<ast.ImportForm>.module is None` means `from .|.. import`, not `from .|..<submod> import`
+            if import_from_ast.module:
+                mod_path = mod_path / import_from_ast.module
+
+            # imported is package
+            abs_import_path = mod_path.resolve()
+            import_name = abs_import_path.stem
+
+            if mod_package := ModulePackage.create_or_null(name=import_name, path=abs_import_path):
+                return self._resolve_mod_package(mod_package)
+            
+            # imported is file
+            for _suffix in SEARCH_FOR_SUFFIXES:
+                abs_import_path = abs_import_path.with_suffix(_suffix).resolve()
+                if mod_file := ModuleFile.create_or_null(name=import_name, path=abs_import_path):
+                    return self._resolve_mod_file(mod_file)
+                
+        return None
     
     def _resolve_import_name(self, import_name: str) -> Optional[ModuleImportsNode]:
         """ Resolve import name for path of file module or package. 
@@ -105,7 +147,7 @@ class ImportResolver:
         
         # imported is file
         for _suffix in SEARCH_FOR_SUFFIXES:
-            abs_import_path = (self.project_dir / (import_path + _suffix)).resolve()
+            abs_import_path = abs_import_path.with_suffix(_suffix).resolve()
             if mod_file := ModuleFile.create_or_null(name=import_name, path=abs_import_path):
                 return self._resolve_mod_file(mod_file)
 
