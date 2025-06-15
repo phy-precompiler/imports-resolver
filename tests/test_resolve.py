@@ -47,7 +47,7 @@ def test_make_resolve_target():
             shutil.copy(src_path, dst_path)
 
 
-@pytest.mark.skip()
+# @pytest.mark.skip()
 @pytest.mark.dependency(name="test_make_resolve_target")
 def test_resolve_target():
     project_dir = TMP_DIR / 'test_target'

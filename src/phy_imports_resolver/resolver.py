@@ -35,6 +35,9 @@ class ImportResolver:
 
     def start(self, entry_file: Path) -> FileModuleImportsNode:
         """ entry file to start resolving """
+        # clear resolved
+        self.resolved_mod = set()
+
         # name of entry module
         entry_file = entry_file.resolve()
 

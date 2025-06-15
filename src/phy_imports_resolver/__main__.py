@@ -6,7 +6,7 @@ import json
 import click
 
 # local imports
-from phy_imports_resolver._resolver import resolve_entry_file
+from phy_imports_resolver import ImportResolver
 
 
 @click.group()
@@ -19,9 +19,12 @@ def phy():
 @click.option('-f', '--file', type=click.Path(exists=True), help='Path to the entry code file')
 def resolve_imports(file: Path):
     """ resolve imports from entry code file """
+    project_dir = Path.cwd().resolve()
+    resolver = ImportResolver(project_dir=project_dir)
+
     entry_file_path = Path(file).resolve()
-    resolved_result = resolve_entry_file(entry_file_path)
-    click.echo(json.dumps(resolved_result, indent=4))
+    resolved_result = resolver.start(entry_file_path)
+    click.echo(str(resolved_result))
 
 
 if __name__ == '__main__':
