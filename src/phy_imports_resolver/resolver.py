@@ -105,8 +105,8 @@ class ImportResolver:
     ) -> List[FileModuleImportsNode]:
         """ 'import' ','.dotted_as_name+ """
         _ = kwargs
-        _ = mod_file
         _code = builtin_ast.unparse(builtin_ast.fix_missing_locations(import_ast))
+        print(f'Start resolve import statemenet: "{_code}" of "{mod_file.path}".')
 
         mod_imports_node_list: List[ModuleImportsNode] = []
 
@@ -133,6 +133,7 @@ class ImportResolver:
         """
         _ = kwargs
         _code = builtin_ast.unparse(builtin_ast.fix_missing_locations(import_from_ast))
+        print(f'Start resolve import statemenet: "{_code}" of "{mod_file.path}".')
 
         mod_imports_node_list: List[ModuleImportsNode] = []
         from_level = import_from_ast.level

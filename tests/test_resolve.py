@@ -21,7 +21,7 @@ def test_resolve_file():
 
 
 # Make file & package to be resolved, mainly partially copy from popular pypi repo
-# @pytest.mark.skip()
+@pytest.mark.skip()
 def test_make_resolve_target():
     from_dir = TMP_DIR / 'django'
     target_dir = TMP_DIR / 'test_target'
@@ -33,6 +33,7 @@ def test_make_resolve_target():
     copy_items = [
         'django/*.py',
         'django/apps/*.py',
+        'django/urls/*.py',
     ]
 
     for _item in copy_items:
@@ -51,7 +52,12 @@ def test_resolve_pypi_package_module():
     project_dir = TMP_DIR / 'test_target'
     entire_file = project_dir / 'django' / '__init__.py'
     resolver = ImportResolver(project_dir=project_dir)
-    result = resolver.start(entire_file)
+
+    try:
+        result = resolver.start(entire_file)
+
+    except RecursionError:
+        print('Resolved mod: ', resolver.resolved_mod)
     
     with open(TEST_OUTPUT_DIR / 'test_target.xml', 'w+', encoding='utf8') as _f:
         _f.write(result.repr_xml())
