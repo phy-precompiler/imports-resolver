@@ -10,6 +10,8 @@ from typing import List, Union
 # TODO: use `phy-core` ast node
 _AstNode = builtin_ast.AST
 
+ImportUnionAst = Union[builtin_ast.Import, builtin_ast.ImportFrom]
+
 
 # TODO: use `phy-core` parser
 class _Parser:
@@ -30,32 +32,32 @@ class _Parser:
 
 
 # TODO: use `phy-core` visitor
-class _Visitor(builtin_ast.NodeVisitor):
+class _ImportAstVisitor(builtin_ast.NodeVisitor):
 
     # instance attributes
-    import_ast_nodes: List[Union[builtin_ast.Import, builtin_ast.ImportFrom]]
+    imported_ast_nodes: List[ImportUnionAst]
 
     def __init__(self):
         """ constructor """
         super().__init__()
-        self.import_ast_nodes = []
+        self.imported_ast_nodes = []
 
     def visit_Import(self, node):
         """ override `visit_Import` method """
-        self.import_ast_nodes.append(node)
+        self.imported_ast_nodes.append(node)
         self.generic_visit(node)
 
     def visit_ImportFrom(self, node):
         """ override `visit_ImportFrom` method """
-        self.import_ast_nodes.append(node)
+        self.imported_ast_nodes.append(node)
         self.generic_visit(node)
 
 
-def extract_import_ast_nodes(file: Path) -> List[Union[builtin_ast.Import, builtin_ast.ImportFrom]]:
+def extract_import_ast_nodes(file: Path) -> List[ImportUnionAst]:
     """ extract import ast node from code """
     parser = _Parser()
     ast_root = parser.parse(file)
     
-    visitor = _Visitor()
+    visitor = _ImportAstVisitor()
     visitor.visit(ast_root)
-    return visitor.import_ast_nodes
+    return visitor.imported_ast_nodes

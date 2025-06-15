@@ -9,10 +9,13 @@ from typing import List, Optional
 import requests
 import git
 
+# local imports
+from ._common import TMP_DIR
+
 
 # constants
 PYPI_STATS_URL = "https://hugovk.github.io/top-pypi-packages/top-pypi-packages-30-days.min.json"
-REPO_DIR = Path(__file__).parent.parent.resolve() / 'tmp'
+REPO_DIR = TMP_DIR
 
 
 def get_repo_url(package_name: str) -> Optional[None]:
@@ -71,4 +74,5 @@ if __name__ == '__main__':
     # main()
     # clone_repo('pandas', repo_url='https://github.com/pandas-dev/pandas')
     # clone_repo('django', repo_url='https://github.com/django/django')
-    clone_repo('numpy', repo_url='https://github.com/numpy/numpy')
+    # clone_repo('numpy', repo_url='https://github.com/numpy/numpy')
+    pass
