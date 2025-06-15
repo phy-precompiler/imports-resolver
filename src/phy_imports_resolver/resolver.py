@@ -165,26 +165,27 @@ class ImportResolver:
             import_name = abs_import_path.stem
 
             if mod_pkg := ModulePackage.create_or_null(name=import_name, path=abs_import_path):
-                # package with `__init__.*`
-                if not mod_pkg.is_native_namespace:
-                    # in case of format "from ... import *", DO NOT resolve submodules if `__init__.*` exists, just 
-                    # resolve the dunder init file of the package
+                # if `__init__.*` exists, firstly resolve the `__init__.*` file
+                if mod_pkg.dunder_init_mod_file:
                     if mod_imports_node := self._resolve_mod_pkg(mod_pkg, code=_code):
                         mod_imports_node_list.append(mod_imports_node)
 
-                # package without `__init__.*`, as well as native namespace package
-                else:
-                    for import_sub_name_ast in import_from_ast.names:
-                        import_sub_name = import_sub_name_ast.name
+                # resolve submodules
+                for import_sub_name_ast in import_from_ast.names:
+                    import_sub_name = import_sub_name_ast.name
 
-                        # submodule 
-                        if submod_file := mod_pkg.get_submod_file(import_sub_name):
-                            if mod_imports_node := self._resolve_mod_file(submod_file, code=_code):
-                                mod_imports_node_list.append(mod_imports_node)
+                    # in case of format "from ... import *"
+                    if import_sub_name == '*':
+                        continue
 
-                        if submod_pkg := mod_pkg.get_submod_pkg(import_sub_name):
-                            if mod_imports_node := self._resolve_mod_pkg(submod_pkg, code=_code):
-                                mod_imports_node_list.append(mod_imports_node)
+                    # submodule 
+                    if submod_file := mod_pkg.get_submod_file(import_sub_name):
+                        if mod_imports_node := self._resolve_mod_file(submod_file, code=_code):
+                            mod_imports_node_list.append(mod_imports_node)
+
+                    if submod_pkg := mod_pkg.get_submod_pkg(import_sub_name):
+                        if mod_imports_node := self._resolve_mod_pkg(submod_pkg, code=_code):
+                            mod_imports_node_list.append(mod_imports_node)
             
             # from module is file
             for _suffix in SEARCH_FOR_SUFFIXES:

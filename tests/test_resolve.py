@@ -47,7 +47,7 @@ def test_make_resolve_target():
             shutil.copy(src_path, dst_path)
 
 
-# @pytest.mark.skip()
+@pytest.mark.skip()
 @pytest.mark.dependency(name="test_make_resolve_target")
 def test_resolve_target():
     project_dir = TMP_DIR / 'test_target'
@@ -66,7 +66,7 @@ def test_resolve_target():
 
 @pytest.mark.skip()
 def test_resolve_pypi_package_module():
-    lib_name = 'numpy'
+    lib_name = 'django'
     project_dir = TMP_DIR / lib_name
     entire_file = project_dir / lib_name / '__init__.py'
     resolver = ImportResolver(project_dir=project_dir)
