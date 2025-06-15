@@ -3,6 +3,9 @@
 # imports
 import os
 import shutil
+from typing import Tuple, List
+from pprint import pprint
+
 import pytest
 
 # local imports
@@ -64,9 +67,9 @@ def test_resolve_target():
         _f.write(str(result))
 
 
-# @pytest.mark.skip()
+@pytest.mark.skip()
 def test_resolve_pypi_package_module():
-    lib_name = 'django'
+    lib_name = 'numpy'
     project_dir = TMP_DIR / lib_name
     entire_file = project_dir / lib_name / '__init__.py'
     resolver = ImportResolver(project_dir=project_dir)
@@ -83,24 +86,29 @@ def test_resolve_pypi_package_module():
 
 @pytest.mark.skip()
 def test_resolve_result_coverage():
-    lib_name = 'django'
+    lib_name = 'numpy'
     project_dir = TMP_DIR / lib_name
     project_src_dir = project_dir / lib_name
 
     # walk project directory
-    py_file_names = []
-    for _, _, _files in os.walk(str(project_src_dir.resolve())):
+    py_file_names: List[Tuple[str, str]] = []  # (file_name, dir)
+    for _root, _, _files in os.walk(str(project_src_dir.resolve())):
         for _file_name in _files:
-            if _file_name.endswith('.py'):
-                if _file_name != '__init__.py':
-                    py_file_names.append(_file_name)
+            if _file_name.endswith('.py') and _file_name != '__init__.py':
+                py_file_names.append((_file_name, _root))
     
-    print(len(py_file_names))
+    print('Total *.py files: ', len(py_file_names))
 
     # test coverage
     with open(TEST_OUTPUT_DIR / f'{lib_name}.xml', encoding='utf8') as _f:
         xml_str = _f.read()
 
-    for _py_file_name in py_file_names:
+    missed_file_names = []
+    for _py_file_name, _dir in py_file_names:
         if _py_file_name not in xml_str:
-            print(f'Not included in resolved tree: {_py_file_name}')
+
+            if _py_file_name not in missed_file_names:
+                print(f'Not included in resolved tree: {_dir} / {_py_file_name}')
+                missed_file_names.append(_py_file_name)
+
+    pprint(missed_file_names)
