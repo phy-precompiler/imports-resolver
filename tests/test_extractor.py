@@ -1,9 +1,7 @@
 # pylint: disable=missing-function-docstring
-""" test `phy_imports_resolver/_extractor.py` """
+""" test extract import ast nodes """
 # imports
-from pathlib import Path
-from pprint import pprint
-
+import ast as builtin_ast
 import pytest
 
 # local imports
@@ -11,12 +9,11 @@ from phy_imports_resolver._extractor import extract_import_ast_nodes
 
 
 # constants
-TEST_DIR = Path(__file__).resolve().parent
-BASE_DIR = TEST_DIR.parent
-SRC_DIR = BASE_DIR / 'src'
+from ._common import SRC_DIR
 
 
 @pytest.mark.skip()
 def test_extract_import_ast_nodes():
-    test_py_file = SRC_DIR / 'phy_imports_resolver' / '_extractor.py'
-    pprint(extract_import_ast_nodes(test_py_file))
+    test_py_file = SRC_DIR / 'phy_imports_resolver' / 'resolver.py'
+    for import_ast in extract_import_ast_nodes(test_py_file):
+        print(builtin_ast.dump(import_ast, indent=4))

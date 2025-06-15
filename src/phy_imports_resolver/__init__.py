@@ -1,15 +1,11 @@
-""" Resolve imports of a python file or module, exclude site 
-packages & builtin modules. 
-"""
-__version__ = "0.1.0"
+""" Resolve imports of a python file or module, exclude site packages & builtin modules. """
+__version__ = "0.2.0"
 __all__ = [
-    'resolve_entry_file',
-    'resolve_entry_package',
-    'ImportPathNode',
-    'print_xml_formatted_import_tree'
+    'ImportResolver',
+    'SEARCH_FOR_SUFFIXES',
 ]
 
 
 # imports
-from phy_imports_resolver._resolver import resolve_entry_file, resolve_entry_package
-from phy_imports_resolver._types import ImportPathNode, print_xml_formatted_import_tree
+from phy_imports_resolver.resolver import ImportResolver
+from phy_imports_resolver.types import SEARCH_FOR_SUFFIXES

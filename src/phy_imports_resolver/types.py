@@ -133,21 +133,11 @@ class ModuleImportsNode:
 
         return root
     
-    def _stringify_repr_element(self) -> str:
+    def repr_xml(self) -> str:
         """ print element tree with indent xml-like format """
         root = self.repr_element()
         ET.indent(root, space=' ' * 2, level=0)
         return ET.tostring(root, encoding='unicode', method='xml')
-    
-    def __str__(self) -> str:
-        """ Both `__str__` & `__repr__` should be explicitly defined, or the subclass
-        may call `object.__str__()` or `obejct.__repr__()`. """
-        return self._stringify_repr_element()
-
-    def __repr__(self):
-        """ Both `__str__` & `__repr__` should be explicitly defined, or the subclass
-        may call `object.__str__()` or `obejct.__repr__()`. """
-        return self._stringify_repr_element()
 
 
 # pylint: disable=useless-parent-delegation
@@ -160,12 +150,6 @@ class FileModuleImportsNode(ModuleImportsNode):
         root = super().repr_element()
         root.tag = 'file'
         return root
-    
-    def __str__(self):
-        return super().__str__()
-    
-    def __repr__(self):
-        return super().__repr__()
 
 
 # pylint: disable=useless-parent-delegation
@@ -178,9 +162,3 @@ class PackageModuleImportsNode(ModuleImportsNode):
         root = super().repr_element()
         root.tag = 'package'
         return root
-    
-    def __str__(self):
-        return super().__str__()
-    
-    def __repr__(self):
-        return super().__repr__()

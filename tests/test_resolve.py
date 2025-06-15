@@ -1,25 +1,12 @@
 # pylint: disable=missing-function-docstring
-
 """ test `phy_imports_resolver/_resolve_import.py` """
 # imports
-from typing import List, Tuple
-from pprint import pprint
-
 import pytest
 
 # local imports
-from phy_imports_resolver._resolver import _resolve_import_name
-from phy_imports_resolver import resolve_entry_file, print_xml_formatted_import_tree
 from phy_imports_resolver.resolver import ImportResolver
 
-from ._common import BASE_DIR, SRC_DIR, TEST_OUTPUT_DIR, TMP_DIR
-
-
-@pytest.mark.skip()
-def test_resolve_import_name():
-    pprint(_resolve_import_name('phy_imports_resolver', SRC_DIR))
-    pprint(_resolve_import_name('phy_imports_resolver.core', SRC_DIR))
-    pprint(_resolve_import_name('phy_imports_resolver.submodule', SRC_DIR))
+from ._common import SRC_DIR, TEST_OUTPUT_DIR, TMP_DIR
 
 
 @pytest.mark.skip()
@@ -28,11 +15,11 @@ def test_resolve_file():
     resolver = ImportResolver(project_dir=SRC_DIR)
     result = resolver.start(entry_file)
     
-    with open(TEST_OUTPUT_DIR / '_resolver.xml', 'w+', encoding='utf8') as _f:
-        _f.write(str(result))
+    with open(TEST_OUTPUT_DIR / f'{entry_file.stem}.xml', 'w+', encoding='utf8') as _f:
+        _f.write(result.repr_xml())
 
 
-# @pytest.mark.skip()
+@pytest.mark.skip()
 def test_resolve_pypi_package_module():
     project_dir = TMP_DIR / 'django'
     entire_file = project_dir / 'django' / '__init__.py'
@@ -40,4 +27,4 @@ def test_resolve_pypi_package_module():
     result = resolver.start(entire_file)
     
     with open(TEST_OUTPUT_DIR / 'django.xml', 'w+', encoding='utf8') as _f:
-        _f.write(str(result))
+        _f.write(result.repr_xml())
