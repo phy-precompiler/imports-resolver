@@ -1,6 +1,7 @@
 # pylint: disable=missing-function-docstring
 """ test `phy_imports_resolver/_resolve_import.py` """
 # imports
+import shutil
 import pytest
 
 # local imports
@@ -9,7 +10,7 @@ from phy_imports_resolver.resolver import ImportResolver
 from ._common import SRC_DIR, TEST_OUTPUT_DIR, TMP_DIR
 
 
-# @pytest.mark.skip()
+@pytest.mark.skip()
 def test_resolve_file():
     entry_file = SRC_DIR / 'phy_imports_resolver' / 'resolver.py'
     resolver = ImportResolver(project_dir=SRC_DIR)
@@ -19,12 +20,38 @@ def test_resolve_file():
         _f.write(result.repr_xml())
 
 
-@pytest.mark.skip()
+# Make file & package to be resolved, mainly partially copy from popular pypi repo
+# @pytest.mark.skip()
+def test_make_resolve_target():
+    from_dir = TMP_DIR / 'django'
+    target_dir = TMP_DIR / 'test_target'
+
+    # clean target dir
+    shutil.rmtree(target_dir)
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    copy_items = [
+        'django/*.py',
+        'django/apps/*.py',
+    ]
+
+    for _item in copy_items:
+        for src_path in from_dir.glob(_item):  # use `glob` to match wildcard
+            dst_path = (target_dir / _item).parent / src_path.name
+
+            dst_dir = dst_path.parent
+            dst_dir.mkdir(parents=True, exist_ok=True)
+
+            shutil.copy(src_path, dst_path)
+
+
+# @pytest.mark.skip()
+@pytest.mark.dependency(name="test_make_resolve_target")
 def test_resolve_pypi_package_module():
-    project_dir = TMP_DIR / 'django'
+    project_dir = TMP_DIR / 'test_target'
     entire_file = project_dir / 'django' / '__init__.py'
     resolver = ImportResolver(project_dir=project_dir)
     result = resolver.start(entire_file)
     
-    with open(TEST_OUTPUT_DIR / 'django.xml', 'w+', encoding='utf8') as _f:
+    with open(TEST_OUTPUT_DIR / 'test_target.xml', 'w+', encoding='utf8') as _f:
         _f.write(result.repr_xml())

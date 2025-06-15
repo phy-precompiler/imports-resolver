@@ -22,9 +22,14 @@ class Module:
     name: str
     path: Path
 
+    # define `__eq__` & `__hash__` to use `set` collection of this class
+    def __eq__(self, other: 'Module') -> bool:
+        if not isinstance(other, Module):  # include subclasses
+            return False
+        return self.path.resolve() == other.resolve()
+    
     def __hash__(self):
-        """ make hashable """
-        return hash(self.path)
+        return hash(str(self.path.resolve()))
 
 
 @dataclass
@@ -49,10 +54,17 @@ class ModuleFile(Module):
             return cls(name=name, path=path)
         raise FileNotFoundError(str(path))
     
-    # pylint: disable=useless-parent-delegation
+    # define `__eq__` & `__hash__` to use `set` collection of this class
+    def __eq__(self, other: 'ModuleFile') -> bool:
+        if not isinstance(other, ModuleFile):  # include subclasses
+            return False
+        return self.path.resolve() == other.resolve()
+    
     def __hash__(self):
-        """ make hashable """
-        return super().__hash__()
+        return hash((
+            self.__class__.__name__, 
+            str(self.path.resolve())
+        ))
 
 
 @dataclass
@@ -88,10 +100,17 @@ class ModulePackage(Module):
             return cls(name=name, path=path)
         raise FileNotFoundError(str(path))
     
-    # pylint: disable=useless-parent-delegation
+    # define `__eq__` & `__hash__` to use `set` collection of this class
+    def __eq__(self, other: 'ModulePackage') -> bool:
+        if not isinstance(other, ModulePackage):  # include subclasses
+            return False
+        return self.path.resolve() == other.resolve()
+    
     def __hash__(self):
-        """ make hashable """
-        return super().__hash__()
+        return hash((
+            self.__class__.__name__, 
+            str(self.path.resolve())
+        ))
 
 
 @dataclass
