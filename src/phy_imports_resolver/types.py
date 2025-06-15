@@ -26,7 +26,7 @@ class Module:
     def __eq__(self, other: 'Module') -> bool:
         if not isinstance(other, Module):  # include subclasses
             return False
-        return self.path.resolve() == other.resolve()
+        return self.path.resolve() == other.path.resolve()
     
     def __hash__(self):
         return hash(str(self.path.resolve()))
@@ -58,7 +58,7 @@ class ModuleFile(Module):
     def __eq__(self, other: 'ModuleFile') -> bool:
         if not isinstance(other, ModuleFile):  # include subclasses
             return False
-        return self.path.resolve() == other.resolve()
+        return self.path.resolve() == other.path.resolve()
     
     def __hash__(self):
         return hash((
@@ -104,7 +104,7 @@ class ModulePackage(Module):
     def __eq__(self, other: 'ModulePackage') -> bool:
         if not isinstance(other, ModulePackage):  # include subclasses
             return False
-        return self.path.resolve() == other.resolve()
+        return self.path.resolve() == other.path.resolve()
     
     def __hash__(self):
         return hash((

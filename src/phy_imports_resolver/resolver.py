@@ -83,15 +83,15 @@ class ImportResolver:
 
         if dunder_init_path := mod_pkg.dunder_init_path:
             # use package name as its dunder init file module name
-            if mod_file := ModuleFile.create_or_null(name=mod_pkg.name, path=dunder_init_path):
-                if mod_file in self.resolved_mod:
+            if init_mod_file := ModuleFile.create_or_null(name=mod_pkg.name, path=dunder_init_path):
+                if init_mod_file in self.resolved_mod:
                     return None
 
-                self.resolved_mod.add(mod_file)
+                init_mod_file_imports_node = self._resolve_mod_file(init_mod_file, code=kwargs.get('code'))
                 return PackageModuleImportsNode(
                     mod=mod_pkg,
                     project_dir=self.project_dir,
-                    imports=self._resolve_mod_file(mod_file, code=kwargs.get('code')),
+                    imports=init_mod_file_imports_node.imports,
                     code=kwargs.get('code')
                 )
             
