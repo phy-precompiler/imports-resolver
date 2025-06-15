@@ -113,17 +113,33 @@ class ModulePackage(Module):
         ))
 
 
-@dataclass
 class ModuleImportsNode:
     """ module with dependent imports info """
-    mod: Module
 
-    # Project is the directory that look for python modules, it is usually the current work directory.
-    # It is essential for resolving imports; if imported module is outside of the project directory, it 
-    # will not be resolved and be regarded as site-packages.
+    # instance attributes
+    mod: Module
     project_dir: Path
     imports: List['ModuleImportsNode']  # DO NOT use `Self` for it is introduced until 3.11
     code: Optional[str] = None  # import statement code
+
+    def __init__(
+        self, 
+        mod: Module, 
+        project_dir: Path, 
+        imports: List['ModuleImportsNode'] = None, 
+        **kwargs
+    ):
+        """ constructor """
+        self.mod = mod
+        self.imports = imports if imports is None else []
+
+        # Project is the directory that look for python modules, it is usually the current work directory.
+        # It is essential for resolving imports; if imported module is outside of the project directory, it 
+        # will not be resolved and be regarded as site-packages.
+        self.project_dir = project_dir.resolve()
+
+        # extra attributes
+        self.code = kwargs.get('code')
 
     @property
     def name(self) -> str:
@@ -152,15 +168,16 @@ class ModuleImportsNode:
 
         return root
     
-    def repr_xml(self) -> str:
+    def __repr__(self) -> str:
         """ print element tree with indent xml-like format """
         root = self.repr_element()
         ET.indent(root, space=' ' * 2, level=0)
         return ET.tostring(root, encoding='unicode', method='xml')
+    
+    def __str__(self) -> str:
+        return self.__repr__()
 
 
-# pylint: disable=useless-parent-delegation
-@dataclass
 class FileModuleImportsNode(ModuleImportsNode):
     """ module of single file with dependent imports info """
     mod: ModuleFile
@@ -171,8 +188,6 @@ class FileModuleImportsNode(ModuleImportsNode):
         return root
 
 
-# pylint: disable=useless-parent-delegation
-@dataclass
 class PackageModuleImportsNode(ModuleImportsNode):
     """ module of single file with dependent imports info """
     mod: ModulePackage
