@@ -153,23 +153,41 @@ class ImportResolver:
                 mod_path = mod_path.parent
                 from_level -= 1
 
-            # `<ast.ImportForm>.module is None` means `from .|.. import`, not `from .|..<submod> import`
+            # "<ast.ImportForm>.module is None" means "from .|.. import", not "from .|..<submod> import"
             if import_from_ast.module:
                 mod_path = mod_path / import_from_ast.module
 
-            # imported is package
+            # from module is package
             abs_import_path = mod_path.resolve()
             import_name = abs_import_path.stem
 
             if mod_pkg := ModulePackage.create_or_null(name=import_name, path=abs_import_path):
-                if mod_imports_node := self._resolve_mod_pkg(mod_pkg, code=_code):
-                    mod_imports_node_list.append(mod_imports_node)
+                # package with `__init__.*`
+                if not mod_pkg.is_native_namespace:
+                    # in case of format "from ... import *", DO NOT resolve submodules if `__init__.*` exists, just 
+                    # resolve the dunder init file of the package
+                    if mod_imports_node := self._resolve_mod_pkg(mod_pkg, code=_code):
+                        mod_imports_node_list.append(mod_imports_node)
+
+                # package without `__init__.*`, as well as native namespace package
+                else:
+                    for import_sub_name_ast in import_from_ast.names:
+                        import_sub_name = import_sub_name_ast.name
+
+                        # submodule 
+                        if submod_file := mod_pkg.get_submod_file(import_sub_name):
+                            if mod_imports_node := self._resolve_mod_file(submod_file, code=_code):
+                                mod_imports_node_list.append(mod_imports_node)
+
+                        if submod_pkg := mod_pkg.get_submod_pkg(import_sub_name):
+                            if mod_imports_node := self._resolve_mod_pkg(submod_pkg, code=_code):
+                                mod_imports_node_list.append(mod_imports_node)
             
-            # imported is file
+            # from module is file
             for _suffix in SEARCH_FOR_SUFFIXES:
                 abs_import_path = abs_import_path.with_suffix(_suffix).resolve()
                 if mod_file := ModuleFile.create_or_null(name=import_name, path=abs_import_path):
-                    if mod_imports_node :=  self._resolve_mod_file(mod_file, code=_code):
+                    if mod_imports_node := self._resolve_mod_file(mod_file, code=_code):
                         mod_imports_node_list.append(mod_imports_node)
                 
         return mod_imports_node_list

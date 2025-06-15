@@ -64,7 +64,7 @@ def test_resolve_target():
 
 
 def test_resolve_pypi_package_module():
-    lib_name = 'django'
+    lib_name = 'numpy'
     project_dir = TMP_DIR / lib_name
     entire_file = project_dir / lib_name / '__init__.py'
     resolver = ImportResolver(project_dir=project_dir)

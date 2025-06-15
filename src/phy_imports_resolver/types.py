@@ -114,14 +114,14 @@ class ModulePackage(Module):
         return self.dunder_init_mod_file is None
     
     @classmethod
-    def create_or_null(cls, name: str, path: Path) -> Optional['ModuleFile']:
+    def create_or_null(cls, name: str, path: Path) -> Optional['ModulePackage']:
         """ validate before create instance; if failed, return None """
         if path.exists() and path.is_dir():
             return cls(name=name, path=path)
         return None
     
     @classmethod
-    def create_or_err(cls, name: str, path: Path) -> Optional['ModuleFile']:
+    def create_or_err(cls, name: str, path: Path) -> Optional['ModulePackage']:
         """ validate before create instance; if failed, raise error """
         if path.exists() and path.is_dir():
             return cls(name=name, path=path)
