@@ -35,8 +35,17 @@ class ImportResolver:
 
     def start(self, entry_file: Path) -> FileModuleImportsNode:
         """ entry file to start resolving """
-        mod_file = ModuleFile.create_or_err(name=entry_file.stem, path=entry_file)
-        return self._resolve_mod_file(mod_file)
+        # name of entry module
+        entry_file = entry_file.resolve()
+
+        if entry_file.stem != '__init__':  # file module
+            mod_file = ModuleFile.create_or_err(name=entry_file.stem, path=entry_file)
+            return self._resolve_mod_file(mod_file)
+        
+        else:  # package module
+            pkg_dir = entry_file.parent.resolve()
+            mod_pkg = ModulePackage.create_or_err(name=pkg_dir.stem, path=pkg_dir)
+            return self._resolve_mod_pkg(mod_pkg)
 
     def _resolve_mod_file(self, mod_file: ModuleFile, **kwargs) -> Optional[FileModuleImportsNode]:
         """ resolve imports of specified module of file """
@@ -63,7 +72,7 @@ class ImportResolver:
             code=kwargs.get('code')
         )
     
-    def _resolve_mod_package(self, mod_pkg: ModulePackage, **kwargs) -> Optional[PackageModuleImportsNode]:
+    def _resolve_mod_pkg(self, mod_pkg: ModulePackage, **kwargs) -> Optional[PackageModuleImportsNode]:
         """ Resolve imports of specified module of package. 
         
         The imports of package module is considered as those of its dunder init file. If the package is native namespace 
@@ -149,8 +158,8 @@ class ImportResolver:
             abs_import_path = mod_path.resolve()
             import_name = abs_import_path.stem
 
-            if mod_package := ModulePackage.create_or_null(name=import_name, path=abs_import_path):
-                if mod_imports_node := self._resolve_mod_package(mod_package, code=_code):
+            if mod_pkg := ModulePackage.create_or_null(name=import_name, path=abs_import_path):
+                if mod_imports_node := self._resolve_mod_pkg(mod_pkg, code=_code):
                     mod_imports_node_list.append(mod_imports_node)
             
             # imported is file
@@ -177,8 +186,8 @@ class ImportResolver:
         abs_import_path = (self.project_dir / import_path).resolve()
         import_name = abs_import_path.stem
 
-        if mod_package := ModulePackage.create_or_null(name=import_name, path=abs_import_path):
-            return self._resolve_mod_package(mod_package, code=kwargs.get('code'))
+        if mod_pkg := ModulePackage.create_or_null(name=import_name, path=abs_import_path):
+            return self._resolve_mod_pkg(mod_pkg, code=kwargs.get('code'))
         
         # imported is file
         for _suffix in SEARCH_FOR_SUFFIXES:

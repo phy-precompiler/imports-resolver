@@ -9,7 +9,7 @@ from phy_imports_resolver.resolver import ImportResolver
 from ._common import SRC_DIR, TEST_OUTPUT_DIR, TMP_DIR
 
 
-@pytest.mark.skip()
+# @pytest.mark.skip()
 def test_resolve_file():
     entry_file = SRC_DIR / 'phy_imports_resolver' / 'resolver.py'
     resolver = ImportResolver(project_dir=SRC_DIR)
