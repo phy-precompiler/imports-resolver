@@ -12,6 +12,7 @@ import pytest
 from phy_imports_resolver.resolver import ImportResolver
 
 from ._common import SRC_DIR, TEST_OUTPUT_DIR, TMP_DIR
+from .retrieve_pypi_repo import clone_repo
 
 
 @pytest.mark.skip()
@@ -68,8 +69,15 @@ def test_resolve_target():
 
 
 @pytest.mark.skip()
+def test_clone_repo():
+    clone_repo('pandas', repo_url='https://github.com/pandas-dev/pandas')
+    # clone_repo('django', repo_url='https://github.com/django/django')
+    # clone_repo('numpy', repo_url='https://github.com/numpy/numpy')    
+
+
+@pytest.mark.skip()
 def test_resolve_pypi_package_module():
-    lib_name = 'numpy'
+    lib_name = 'pandas'
     project_dir = TMP_DIR / lib_name
     entire_file = project_dir / lib_name / '__init__.py'
     resolver = ImportResolver(project_dir=project_dir)
@@ -86,7 +94,7 @@ def test_resolve_pypi_package_module():
 
 @pytest.mark.skip()
 def test_resolve_result_coverage():
-    lib_name = 'numpy'
+    lib_name = 'pandas'
     project_dir = TMP_DIR / lib_name
     project_src_dir = project_dir / lib_name
 
