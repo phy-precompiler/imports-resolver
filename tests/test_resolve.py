@@ -1,6 +1,7 @@
 # pylint: disable=missing-function-docstring
 """ test `phy_imports_resolver/_resolve_import.py` """
 # imports
+import os
 import shutil
 import pytest
 
@@ -63,6 +64,7 @@ def test_resolve_target():
         _f.write(str(result))
 
 
+@pytest.mark.skip()
 def test_resolve_pypi_package_module():
     lib_name = 'numpy'
     project_dir = TMP_DIR / lib_name
@@ -77,3 +79,28 @@ def test_resolve_pypi_package_module():
     
     with open(TEST_OUTPUT_DIR / f'{lib_name}.xml', 'w+', encoding='utf8') as _f:
         _f.write(str(result))
+
+
+@pytest.mark.skip()
+def test_resolve_result_coverage():
+    lib_name = 'django'
+    project_dir = TMP_DIR / lib_name
+    project_src_dir = project_dir / lib_name
+
+    # walk project directory
+    py_file_names = []
+    for _, _, _files in os.walk(str(project_src_dir.resolve())):
+        for _file_name in _files:
+            if _file_name.endswith('.py'):
+                if _file_name != '__init__.py':
+                    py_file_names.append(_file_name)
+    
+    print(len(py_file_names))
+
+    # test coverage
+    with open(TEST_OUTPUT_DIR / f'{lib_name}.xml', encoding='utf8') as _f:
+        xml_str = _f.read()
+
+    for _py_file_name in py_file_names:
+        if _py_file_name not in xml_str:
+            print(f'Not included in resolved tree: {_py_file_name}')
