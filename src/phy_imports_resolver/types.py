@@ -75,16 +75,43 @@ class ModulePackage(Module):
     for `native namespace package`, which is not unnessary to take into account here for different native 
     namesapce packages cannot coexists in same project folder.
     """
+    def get_submod(self, submod_name: str) -> Optional[Module]:
+        """ find submodule of the package """
+        if submod_file := self.get_submod_file(submod_name):
+            return submod_file
+        if submod_pkg := self.get_submod_pkg(submod_name):
+            return submod_pkg
+        return None
+
+    def get_submod_file(self, submod_name: str) -> Optional[ModuleFile]:
+        """ find file submodule of the package """
+        for _suffix in SEARCH_FOR_SUFFIXES:
+            submod_path = self.path / (submod_name + _suffix)
+            if submod_file := ModuleFile.create_or_null(name=submod_name, path=submod_path):
+                return submod_file
+        return None
+
+    def get_submod_pkg(self, submod_name: str) -> Optional['ModulePackage']:
+        """ find package submodule of the package """
+        submod_path = self.path / submod_name
+        return ModulePackage.create_or_null(name=submod_name, path=submod_path)
+
     @property
-    def dunder_init_path(self) -> Optional[Path]:
+    def dunder_init_mod_file(self) -> Optional[ModuleFile]:
         """ `__init__.*` file of the package """
         for _suffix in SEARCH_FOR_SUFFIXES:
-            dunder_init_file = self.path / ('__init__' + _suffix)
-            if dunder_init_file.exists() and dunder_init_file.is_file():
-                return dunder_init_file
+            dunder_init_path = self.path / ('__init__' + _suffix)
+            # use package name as mod name
+            if dunder_init_file := ModuleFile.create_or_null(name=self.name, path=dunder_init_path):
+                return  dunder_init_file
         
         # dunder init file may not exists in cases of `native namespace package`
         return None
+    
+    @property
+    def is_native_namespace(self) -> bool:
+        """ dunder init file may not exists when self is `native namespace package` """
+        return self.dunder_init_mod_file is None
     
     @classmethod
     def create_or_null(cls, name: str, path: Path) -> Optional['ModuleFile']:
