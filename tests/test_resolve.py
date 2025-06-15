@@ -1,6 +1,7 @@
 # pylint: disable=missing-function-docstring
 """ test `phy_imports_resolver/_resolve_import.py` """
 # imports
+import os
 import shutil
 import pytest
 
@@ -17,7 +18,7 @@ def test_resolve_file():
     result = resolver.start(entry_file)
     
     with open(TEST_OUTPUT_DIR / f'{entry_file.stem}.xml', 'w+', encoding='utf8') as _f:
-        _f.write(result.repr_xml())
+        _f.write(str(result))
 
 
 # Make file & package to be resolved, mainly partially copy from popular pypi repo
@@ -46,9 +47,9 @@ def test_make_resolve_target():
             shutil.copy(src_path, dst_path)
 
 
-# @pytest.mark.skip()
+@pytest.mark.skip()
 @pytest.mark.dependency(name="test_make_resolve_target")
-def test_resolve_pypi_package_module():
+def test_resolve_target():
     project_dir = TMP_DIR / 'test_target'
     entire_file = project_dir / 'django' / '__init__.py'
     resolver = ImportResolver(project_dir=project_dir)
@@ -60,4 +61,46 @@ def test_resolve_pypi_package_module():
         print('Resolved mod: ', resolver.resolved_mod)
     
     with open(TEST_OUTPUT_DIR / 'test_target.xml', 'w+', encoding='utf8') as _f:
-        _f.write(result.repr_xml())
+        _f.write(str(result))
+
+
+@pytest.mark.skip()
+def test_resolve_pypi_package_module():
+    lib_name = 'numpy'
+    project_dir = TMP_DIR / lib_name
+    entire_file = project_dir / lib_name / '__init__.py'
+    resolver = ImportResolver(project_dir=project_dir)
+
+    try:
+        result = resolver.start(entire_file)
+
+    except RecursionError:
+        print('Resolved mod: ', resolver.resolved_mod)
+    
+    with open(TEST_OUTPUT_DIR / f'{lib_name}.xml', 'w+', encoding='utf8') as _f:
+        _f.write(str(result))
+
+
+@pytest.mark.skip()
+def test_resolve_result_coverage():
+    lib_name = 'django'
+    project_dir = TMP_DIR / lib_name
+    project_src_dir = project_dir / lib_name
+
+    # walk project directory
+    py_file_names = []
+    for _, _, _files in os.walk(str(project_src_dir.resolve())):
+        for _file_name in _files:
+            if _file_name.endswith('.py'):
+                if _file_name != '__init__.py':
+                    py_file_names.append(_file_name)
+    
+    print(len(py_file_names))
+
+    # test coverage
+    with open(TEST_OUTPUT_DIR / f'{lib_name}.xml', encoding='utf8') as _f:
+        xml_str = _f.read()
+
+    for _py_file_name in py_file_names:
+        if _py_file_name not in xml_str:
+            print(f'Not included in resolved tree: {_py_file_name}')
