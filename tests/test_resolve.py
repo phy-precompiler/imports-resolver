@@ -17,7 +17,7 @@ def test_resolve_file():
     result = resolver.start(entry_file)
     
     with open(TEST_OUTPUT_DIR / f'{entry_file.stem}.xml', 'w+', encoding='utf8') as _f:
-        _f.write(result.repr_xml())
+        _f.write(str(result))
 
 
 # Make file & package to be resolved, mainly partially copy from popular pypi repo
@@ -46,9 +46,9 @@ def test_make_resolve_target():
             shutil.copy(src_path, dst_path)
 
 
-# @pytest.mark.skip()
+@pytest.mark.skip()
 @pytest.mark.dependency(name="test_make_resolve_target")
-def test_resolve_pypi_package_module():
+def test_resolve_target():
     project_dir = TMP_DIR / 'test_target'
     entire_file = project_dir / 'django' / '__init__.py'
     resolver = ImportResolver(project_dir=project_dir)
@@ -60,4 +60,20 @@ def test_resolve_pypi_package_module():
         print('Resolved mod: ', resolver.resolved_mod)
     
     with open(TEST_OUTPUT_DIR / 'test_target.xml', 'w+', encoding='utf8') as _f:
-        _f.write(result.repr_xml())
+        _f.write(str(result))
+
+
+def test_resolve_pypi_package_module():
+    lib_name = 'django'
+    project_dir = TMP_DIR / lib_name
+    entire_file = project_dir / lib_name / '__init__.py'
+    resolver = ImportResolver(project_dir=project_dir)
+
+    try:
+        result = resolver.start(entire_file)
+
+    except RecursionError:
+        print('Resolved mod: ', resolver.resolved_mod)
+    
+    with open(TEST_OUTPUT_DIR / f'{lib_name}.xml', 'w+', encoding='utf8') as _f:
+        _f.write(str(result))

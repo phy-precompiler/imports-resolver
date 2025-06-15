@@ -101,7 +101,7 @@ class ModulePackage(Module):
         """ `__init__.*` file of the package """
         for _suffix in SEARCH_FOR_SUFFIXES:
             dunder_init_path = self.path / ('__init__' + _suffix)
-            # use package name as mod name
+            # use package name as mod file name
             if dunder_init_file := ModuleFile.create_or_null(name=self.name, path=dunder_init_path):
                 return  dunder_init_file
         
@@ -147,7 +147,8 @@ class ModuleImportsNode:
     mod: Module
     project_dir: Path
     imports: List['ModuleImportsNode']  # DO NOT use `Self` for it is introduced until 3.11
-    code: Optional[str] = None  # import statement code
+
+    code: Optional[str]  # import statement code
 
     def __init__(
         self, 
@@ -158,7 +159,7 @@ class ModuleImportsNode:
     ):
         """ constructor """
         self.mod = mod
-        self.imports = imports if imports is None else []
+        self.imports = imports if imports is not None else []
 
         # Project is the directory that look for python modules, it is usually the current work directory.
         # It is essential for resolving imports; if imported module is outside of the project directory, it 

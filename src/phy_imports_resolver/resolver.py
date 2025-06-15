@@ -51,26 +51,26 @@ class ImportResolver:
         """ resolve imports of specified module of file """
         if mod_file in self.resolved_mod:
             return None
-
-        mod_imports_node_list: List[ModuleImportsNode] = []
+        
+        # create node with imports un-resolved
+        mod_file_imports_node = FileModuleImportsNode(
+            mod=mod_file, 
+            project_dir=self.project_dir, 
+            code=kwargs.get('code')
+        )
+        self.resolved_mod.add(mod_file)
 
         for _import_union_ast in mod_file.extract_import_ast():
             if isinstance(_import_union_ast, builtin_ast.Import):
-                mod_imports_node_list += self._resolve_import_ast(_import_union_ast, mod_file)
+                mod_file_imports_node.imports += self._resolve_import_ast(_import_union_ast, mod_file)
 
             elif isinstance(_import_union_ast, builtin_ast.ImportFrom):
-                mod_imports_node_list += self._resolve_import_from_ast(_import_union_ast, mod_file)
+                mod_file_imports_node.imports += self._resolve_import_from_ast(_import_union_ast, mod_file)
 
             else:
                 raise TypeError  # never occurs
         
-        self.resolved_mod.add(mod_file)
-        return FileModuleImportsNode(
-            mod=mod_file, 
-            project_dir=self.project_dir, 
-            imports=mod_imports_node_list,
-            code=kwargs.get('code')
-        )
+        return mod_file_imports_node
     
     def _resolve_mod_pkg(self, mod_pkg: ModulePackage, **kwargs) -> Optional[PackageModuleImportsNode]:
         """ Resolve imports of specified module of package. 
@@ -81,19 +81,21 @@ class ImportResolver:
         if mod_pkg in self.resolved_mod:
             return None
 
-        if dunder_init_path := mod_pkg.dunder_init_path:
+        if init_mod_file := mod_pkg.dunder_init_mod_file:
             # use package name as its dunder init file module name
-            if init_mod_file := ModuleFile.create_or_null(name=mod_pkg.name, path=dunder_init_path):
-                if init_mod_file in self.resolved_mod:
-                    return None
+            if init_mod_file in self.resolved_mod:
+                return None
 
-                init_mod_file_imports_node = self._resolve_mod_file(init_mod_file, code=kwargs.get('code'))
-                return PackageModuleImportsNode(
-                    mod=mod_pkg,
-                    project_dir=self.project_dir,
-                    imports=init_mod_file_imports_node.imports,
-                    code=kwargs.get('code')
-                )
+            mod_pkg_imports_node = PackageModuleImportsNode(
+                mod=mod_pkg,
+                project_dir=self.project_dir,
+                code=kwargs.get('code')
+            )
+            self.resolved_mod.add(mod_pkg_imports_node)
+
+            init_mod_file_imports_node = self._resolve_mod_file(init_mod_file, code=kwargs.get('code'))
+            mod_pkg_imports_node.imports = init_mod_file_imports_node.imports
+            return mod_pkg_imports_node
             
         raise FileNotFoundError(str(mod_pkg.path / '__init__.*'))
     
