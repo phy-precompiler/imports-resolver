@@ -107,7 +107,7 @@ class ImportResolver:
         import_ast: builtin_ast.Import, 
         mod_file: ModuleFile,
         **kwargs
-    ) -> List[FileModuleImportsNode]:
+    ) -> List[ModuleImportsNode]:
         """ 'import' ','.dotted_as_name+ """
         _ = kwargs
         _code = builtin_ast.unparse(builtin_ast.fix_missing_locations(import_ast))
@@ -131,7 +131,7 @@ class ImportResolver:
         import_from_ast: builtin_ast.ImportFrom, 
         mod_file: ModuleFile,
         **kwargs
-    ) -> Optional[FileModuleImportsNode]:
+    ) -> List[ModuleImportsNode]:
         """ import_from:
             | 'from' ('.' | '...')* dotted_name 'import' import_from_targets 
             | 'from' ('.' | '...')+ 'import' import_from_targets 
@@ -143,57 +143,56 @@ class ImportResolver:
         mod_imports_node_list: List[ModuleImportsNode] = []
         from_level = import_from_ast.level
 
-        # level = 0: 'from' dotted_name 'import' import_from_targets
-        # No dot operator to resolve.
-        if not from_level:
-            if mod_imports_node := self._resolve_import_name(import_from_ast.module, code=_code):
-                mod_imports_node_list.append(mod_imports_node)
-
-        # level > 0
-        else:
+        # level > 0 : relative imports; need to get absolute mod path by resolving level
+        if from_level:
             mod_path = mod_file.path
             while from_level:
                 mod_path = mod_path.parent
                 from_level -= 1
-
-            # "<ast.ImportForm>.module is None" means "from .|.. import", not "from .|..<submod> import"
-            if import_from_ast.module:
-                mod_path = mod_path / import_from_ast.module
-
-            # from module is package
-            abs_import_path = mod_path.resolve()
-            import_name = abs_import_path.stem
-
-            if mod_pkg := ModulePackage.create_or_null(name=import_name, path=abs_import_path):
-                # if `__init__.*` exists, firstly resolve the `__init__.*` file
-                if mod_pkg.dunder_init_mod_file:
-                    if mod_imports_node := self._resolve_mod_pkg(mod_pkg, code=_code):
-                        mod_imports_node_list.append(mod_imports_node)
-
-                # resolve submodules
-                for import_sub_name_ast in import_from_ast.names:
-                    import_sub_name = import_sub_name_ast.name
-
-                    # in case of format "from ... import *"
-                    if import_sub_name == '*':
-                        continue
-
-                    # submodule 
-                    if submod_file := mod_pkg.get_submod_file(import_sub_name):
-                        if mod_imports_node := self._resolve_mod_file(submod_file, code=_code):
-                            mod_imports_node_list.append(mod_imports_node)
-
-                    if submod_pkg := mod_pkg.get_submod_pkg(import_sub_name):
-                        if mod_imports_node := self._resolve_mod_pkg(submod_pkg, code=_code):
-                            mod_imports_node_list.append(mod_imports_node)
-            
-            # from module is file
-            for _suffix in SEARCH_FOR_SUFFIXES:
-                abs_import_path = abs_import_path.with_suffix(_suffix).resolve()
-                if mod_file := ModuleFile.create_or_null(name=import_name, path=abs_import_path):
-                    if mod_imports_node := self._resolve_mod_file(mod_file, code=_code):
-                        mod_imports_node_list.append(mod_imports_node)
                 
+        # level = 0: 'from' dotted_name 'import' import_from_targets
+        else:
+            mod_path = self.project_dir
+
+        # "<ast.ImportForm>.module is None" means "from .|.. import", not "from .|..<submod> import"
+        if import_from_ast.module:
+            import_path = import_from_ast.module.replace('.', os.sep)
+            mod_path = mod_path / import_path
+
+        # from module is package
+        abs_import_path = mod_path.resolve()
+        import_name = abs_import_path.stem
+
+        if mod_pkg := ModulePackage.create_or_null(name=import_name, path=abs_import_path):
+            # if `__init__.*` exists, firstly resolve the `__init__.*` file
+            if mod_pkg.dunder_init_mod_file:
+                if mod_imports_node := self._resolve_mod_pkg(mod_pkg, code=_code):
+                    mod_imports_node_list.append(mod_imports_node)
+
+            # resolve submodules
+            for import_sub_name_ast in import_from_ast.names:
+                import_sub_name = import_sub_name_ast.name
+
+                # in case of format "from ... import *"
+                if import_sub_name == '*':
+                    continue
+
+                # submodule 
+                if submod_file := mod_pkg.get_submod_file(import_sub_name):
+                    if mod_imports_node := self._resolve_mod_file(submod_file, code=_code):
+                        mod_imports_node_list.append(mod_imports_node)
+
+                if submod_pkg := mod_pkg.get_submod_pkg(import_sub_name):
+                    if mod_imports_node := self._resolve_mod_pkg(submod_pkg, code=_code):
+                        mod_imports_node_list.append(mod_imports_node)
+        
+        # from module is file
+        for _suffix in SEARCH_FOR_SUFFIXES:
+            abs_import_path = abs_import_path.with_suffix(_suffix).resolve()
+            if mod_file := ModuleFile.create_or_null(name=import_name, path=abs_import_path):
+                if mod_imports_node := self._resolve_mod_file(mod_file, code=_code):
+                    mod_imports_node_list.append(mod_imports_node)
+            
         return mod_imports_node_list
     
     def _resolve_import_name(self, import_name: str, **kwargs) -> Optional[ModuleImportsNode]:

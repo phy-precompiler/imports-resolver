@@ -64,7 +64,7 @@ def test_resolve_target():
         _f.write(str(result))
 
 
-@pytest.mark.skip()
+# @pytest.mark.skip()
 def test_resolve_pypi_package_module():
     lib_name = 'django'
     project_dir = TMP_DIR / lib_name
