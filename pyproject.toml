@@ -1,6 +1,6 @@
 [project]
 name = "phy-imports-resolver"
-version = "0.1.0"
+version = "0.3.0"
 description = "Resolve imports of a python file or module, exclude site packages & builtin modules."
 authors = [
     {name = "Alfred DU",email = "ihearmywords@hotmail.com"}
