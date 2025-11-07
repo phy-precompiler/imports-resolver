@@ -1,0 +1,32 @@
+[MAIN]
+ignore = 
+    .tox,
+    .venv
+
+ignore-paths = 
+    ^tmp/
+
+[MESSAGES CONTROL]
+disable = 
+    bad-inline-option,
+    consider-using-f-string,
+    deprecated-pragma,
+    file-ignored,
+    invalid-name,
+    line-too-long,
+    locally-disabled,
+    no-else-return,
+    raw-checker-failed,
+    suppressed-message,
+    too-few-public-methods,
+    too-many-branches,
+    too-many-locals,
+    too-many-nested-blocks,
+    too-many-statements,
+    trailing-whitespace,
+    unnecessary-pass,
+    use-dict-literal,
+    use-implicit-booleaness-not-comparison-to-string,
+    use-implicit-booleaness-not-comparison-to-zero,
+    use-symbolic-message-instead,
+    useless-suppression,
