@@ -3,11 +3,18 @@
 import os
 import ast as builtin_ast
 from pathlib import Path
-from typing import Optional, List, Set
+from typing import List, Set
 
 # local imports
-from phy_imports_resolver.types import SEARCH_FOR_SUFFIXES, Module, ModuleFile, ModulePackage, \
-    ModuleImportsNode, FileModuleImportsNode, PackageModuleImportsNode
+from phy_imports_resolver.types import (
+    SEARCH_FOR_SUFFIXES, 
+    Module, 
+    ModuleFile, 
+    ModulePackage, 
+    ModuleImportsNode, 
+    FileModuleImportsNode, 
+    PackageModuleImportsNode
+)
 
 
 class ImportResolver:
@@ -33,7 +40,7 @@ class ImportResolver:
         self.project_dir = project_dir
         self.resolved_mod = set()
 
-    def start(self, entry_file: Path) -> FileModuleImportsNode:
+    def start(self, entry_file: Path) -> FileModuleImportsNode | None:
         """ entry file to start resolving """
         # clear resolved
         self.resolved_mod = set()
@@ -43,14 +50,14 @@ class ImportResolver:
 
         if entry_file.stem != '__init__':  # file module
             mod_file = ModuleFile.create_or_err(name=entry_file.stem, path=entry_file)
-            return self._resolve_mod_file(mod_file)
+            return self._resolve_mod_file(mod_file)  # type: ignore[arg-type]
         
         else:  # package module
             pkg_dir = entry_file.parent.resolve()
             mod_pkg = ModulePackage.create_or_err(name=pkg_dir.stem, path=pkg_dir)
-            return self._resolve_mod_pkg(mod_pkg)
+            return self._resolve_mod_pkg(mod_pkg)  # type: ignore[arg-type, return-value]
 
-    def _resolve_mod_file(self, mod_file: ModuleFile, **kwargs) -> Optional[FileModuleImportsNode]:
+    def _resolve_mod_file(self, mod_file: ModuleFile, **kwargs) -> FileModuleImportsNode | None:
         """ resolve imports of specified module of file """
         if mod_file in self.resolved_mod:
             return None
@@ -75,7 +82,7 @@ class ImportResolver:
         
         return mod_file_imports_node
     
-    def _resolve_mod_pkg(self, mod_pkg: ModulePackage, **kwargs) -> Optional[PackageModuleImportsNode]:
+    def _resolve_mod_pkg(self, mod_pkg: ModulePackage, **kwargs) -> PackageModuleImportsNode | None:
         """ Resolve imports of specified module of package. 
         
         The imports of package module is considered as those of its dunder init file. If the package is native namespace 
@@ -94,7 +101,7 @@ class ImportResolver:
                 project_dir=self.project_dir,
                 code=kwargs.get('code')
             )
-            self.resolved_mod.add(mod_pkg_imports_node)
+            self.resolved_mod.add(mod_pkg_imports_node)  # type: ignore[arg-type]
 
             init_mod_file_imports_node = self._resolve_mod_file(init_mod_file, code=kwargs.get('code'))
             mod_pkg_imports_node.imports = init_mod_file_imports_node.imports
@@ -179,7 +186,7 @@ class ImportResolver:
 
                 # submodule 
                 if submod_file := mod_pkg.get_submod_file(import_sub_name):
-                    if mod_imports_node := self._resolve_mod_file(submod_file, code=_code):
+                    if mod_imports_node := self._resolve_mod_file(submod_file, code=_code):  # type: ignore[assignment]
                         mod_imports_node_list.append(mod_imports_node)
 
                 if submod_pkg := mod_pkg.get_submod_pkg(import_sub_name):
@@ -189,13 +196,13 @@ class ImportResolver:
         # from module is file
         for _suffix in SEARCH_FOR_SUFFIXES:
             abs_import_path = abs_import_path.with_suffix(_suffix).resolve()
-            if mod_file := ModuleFile.create_or_null(name=import_name, path=abs_import_path):
-                if mod_imports_node := self._resolve_mod_file(mod_file, code=_code):
+            if mod_file := ModuleFile.create_or_null(name=import_name, path=abs_import_path):  # type: ignore[assignment]
+                if mod_imports_node := self._resolve_mod_file(mod_file, code=_code):  # type: ignore[assignment]
                     mod_imports_node_list.append(mod_imports_node)
             
         return mod_imports_node_list
     
-    def _resolve_import_name(self, import_name: str, **kwargs) -> Optional[ModuleImportsNode]:
+    def _resolve_import_name(self, import_name: str, **kwargs) -> ModuleImportsNode | None:
         """ Resolve import name for path of file module or package. 
 
         Import name should be absolute, no relative symbol '.' or '..' is allowed.

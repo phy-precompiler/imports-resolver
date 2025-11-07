@@ -23,7 +23,7 @@ class Module:
     path: Path
 
     # define `__eq__` & `__hash__` to use `set` collection of this class
-    def __eq__(self, other: 'Module') -> bool:
+    def __eq__(self, other: 'Module') -> bool:  # type: ignore[override]
         if not isinstance(other, Module):  # include subclasses
             return False
         return self.path.resolve() == other.path.resolve()
@@ -55,7 +55,7 @@ class ModuleFile(Module):
         raise FileNotFoundError(str(path))
     
     # define `__eq__` & `__hash__` to use `set` collection of this class
-    def __eq__(self, other: 'ModuleFile') -> bool:
+    def __eq__(self, other: 'ModuleFile') -> bool:  # type: ignore[override]
         if not isinstance(other, ModuleFile):  # include subclasses
             return False
         return self.path.resolve() == other.path.resolve()
@@ -128,7 +128,7 @@ class ModulePackage(Module):
         raise FileNotFoundError(str(path))
     
     # define `__eq__` & `__hash__` to use `set` collection of this class
-    def __eq__(self, other: 'ModulePackage') -> bool:
+    def __eq__(self, other: 'ModulePackage') -> bool:  # type: ignore[override]
         if not isinstance(other, ModulePackage):  # include subclasses
             return False
         return self.path.resolve() == other.path.resolve()
