@@ -1,5 +1,11 @@
 # PHY-resolve-imports
 
+<p align="left">
+  <a href="#"><img alt="PyPI" src="https://img.shields.io/pypi/v/phy-imports-resolver.svg"></a>
+  <a href="#"><img alt="Python Versions" src="https://img.shields.io/pypi/pyversions/phy-imports-resolver.svg"></a>
+  <a href="#"><img alt="License" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
+</p>
+
 Resolve imports of a python file or module recursively, exclude site packages & builtin modules.
 
 This project is part of [`phy`](https://github.com/phy-precompiler).
