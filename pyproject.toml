@@ -12,6 +12,10 @@ dependencies = [
     "click>=8.1.8",
 ]
 
+# optional dependency groups
+[project.optional-dependencies]
+cli-diagram = ["graphviz"]
+
 # to be collected by `phy_cli` meta command
 [project.entry-points."phy_sub_commands"]
 cli_app = "phy_imports_resolver.cli:cli_app"
@@ -36,3 +40,4 @@ requests = "^2.32.3"
 mypy = "^1.18.2"
 tox = "^4.32.0"
 pydoc-markdown = "^4.8.2"
+graphviz = "^0.21"

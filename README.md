@@ -12,8 +12,19 @@ This project is part of [`phy`](https://github.com/phy-precompiler).
 
 ## Install
 
+## Install
+
+If you intend to use this package as a library within your Python project, install it as follows:
+
 ```shell
 pip install phy-imports-resolver
+```
+
+If you plan to use its command-line interface (CLI) to generate graphic digram, install the `cli-diagram` 
+optional dependencies:
+
+```shell
+pip install phy-imports-resolver[cli-diagram]
 ```
 
 ## How to use
