@@ -18,7 +18,7 @@ If you intend to use this package as a library within your Python project, insta
 pip install phy-imports-resolver
 ```
 
-If you plan to use its command-line interface (CLI) to generate graphic digram, install the `cli` 
+If you plan to use its command-line interface (CLI) to generate graphic diagram, install the `cli` 
 optional dependencies:
 
 ```shell

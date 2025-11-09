@@ -1,5 +1,5 @@
 """ Resolve imports of a python file or module, exclude site packages & builtin modules. """
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 __all__ = [
     'resolve',
     'FileModuleImportsNode',
