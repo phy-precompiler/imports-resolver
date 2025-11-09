@@ -20,11 +20,11 @@ If you intend to use this package as a library within your Python project, insta
 pip install phy-imports-resolver
 ```
 
-If you plan to use its command-line interface (CLI) to generate graphic digram, install the `cli-diagram` 
+If you plan to use its command-line interface (CLI) to generate graphic digram, install the `cli` 
 optional dependencies:
 
 ```shell
-pip install phy-imports-resolver[cli-diagram]
+pip install phy-imports-resolver[cli]
 ```
 
 ## How to use

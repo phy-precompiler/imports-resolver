@@ -1,7 +1,13 @@
 """ cli app by `click` """
 # imports
 from pathlib import Path
-import click
+try:
+    import click
+except ImportError as err:
+    raise SystemExit(
+        'The CLI requires extra dependencies. ' +
+        'Please install with `pip install phy-imports-resolver[cli]`.'
+    ) from err
 
 # local imports
 from phy_imports_resolver import ImportResolver

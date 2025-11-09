@@ -9,12 +9,11 @@ readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.10, <4"
 dependencies = [
-    "click>=8.1.8",
 ]
 
 # optional dependency groups
 [project.optional-dependencies]
-cli-diagram = ["graphviz"]
+cli = ["click", "graphviz"]
 
 # to be collected by `phy_cli` meta command
 [project.entry-points."phy_sub_commands"]
@@ -32,12 +31,13 @@ requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.group.dev.dependencies]
+click = "^8.3.0"
 gitpython = "^3.1.44"
+graphviz = "^0.21"
+mypy = "^1.18.2"
+pydoc-markdown = "^4.8.2"
 pylint = "^4.0.2"
 pytest = "^8.3.5"
 pytest-dependency = "^0.6.0"
 requests = "^2.32.3"
-mypy = "^1.18.2"
 tox = "^4.32.0"
-pydoc-markdown = "^4.8.2"
-graphviz = "^0.21"
