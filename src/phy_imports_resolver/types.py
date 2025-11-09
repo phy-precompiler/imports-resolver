@@ -217,7 +217,7 @@ class FileModuleImportsNode(ModuleImportsNode):
 
 
 class PackageModuleImportsNode(ModuleImportsNode):
-    """ module of single file with dependent imports info """
+    """ module of package with dependent imports info """
     mod: ModulePackage
 
     def repr_element(self) -> ET.Element:

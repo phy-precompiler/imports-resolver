@@ -12,8 +12,6 @@ This project is part of [`phy`](https://github.com/phy-precompiler).
 
 ## Install
 
-## Install
-
 If you intend to use this package as a library within your Python project, install it as follows:
 
 ```shell
@@ -29,21 +27,51 @@ pip install phy-imports-resolver[cli]
 
 ## How to use
 
-### the API
+Suppose the layout of your python project is:
 
-Use the `phy_imports_resolver.resolve(entry_file:, project_dir)` method:
-
-```python
-from pathlib import Path
-import phy_imports_resolver
-
-current_dir = Path.cwd().resolve()
-phy_imports_resolver.resolve(current_dir / '__init__.py', project_dir=current_dir)
+```shell
+my_project/
+├── file1.py
+├── file2.py
+├── pkg1.py
+│   ├── file3.py
+│   └── __init__.py
+└── __init__.py
 ```
 
-what returns is a `FileModuleImportsNode` object; see the reference in [types](docs/types.md).
+To resolve the imports tree: 
 
-### the CLI
++ Firstly you MUST specify a root directory named `project_dir` to search within; in this case, 
+it is `my_project`. If `project_dir` is not explicitly provided, current directory is used.
+
++ An entry file path is also required as the start point for the resolver to search from. If you want to resolve from 
+a package instead a file, use the `__init__.py` file of the package as the entry file.
+
+With the required arguments, call the `resolve(entry_file)` method:
+
+```python
+import phy_imports_resolver
+mod_imports_node = phy_imports_resolver.resolve(entry_file, project_dir)
+```
+
+where `mod_imports_node` is a `ModuleImportsNode` object, which represents a file module or sub package in a hierarchical tree structure of importing relationship. See the definition of `ModuleImportsNode`:
+
+```python
+class ModuleImportsNode:
+    # instance attributes
+    mod: Module
+    project_dir: Path
+    imports: List['ModuleImportsNode']
+    code: Optional[str]
+```
+
+where attribute `mod` stands for the file or package itself, and list attribute `imports` holds other modules imported to itself.
+
+Recursively iterate the `imports` attributes of the entry `ModuleImportsNode` object will given the entire importing relationship tree. 
+
+The complete API docs can be found [here](./docs/module.md).
+
+### use the CLI
 
 ```shell
 Usage: phy-resolve-imports resolve-imports [OPTIONS] FILE
@@ -52,6 +80,8 @@ Usage: phy-resolve-imports resolve-imports [OPTIONS] FILE
 
   FILE: path to the entry code file.
 ```
+
+For the CLI, current work directory will be used as the root directory to search within.
 
 # API docs
 

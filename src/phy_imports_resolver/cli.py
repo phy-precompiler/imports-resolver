@@ -13,19 +13,13 @@ except ImportError as err:
 from phy_imports_resolver import ImportResolver
 
 
-@click.group(name='phy-resolve-imports')
-def cli_app():
-    """ Resolve the imports of a python file or module, recursively. """
-    pass
-
-
-@cli_app.command()
+@click.command(name='resolve-imports')
 @click.argument(
     'file', 
     type=click.Path(exists=True)
 )
-def resolve_imports(file: Path):
-    """ Resolve imports from entry code file. 
+def cli_app(file: Path):
+    """ Resolve the imports of a python file or module, recursively.
     
     FILE: path to the entry code file.
     """
@@ -39,4 +33,5 @@ def resolve_imports(file: Path):
 
 def main():
     """ expose method entry to `pyproject.toml` script spec """
+    # this is click command; pylint: disable=no-value-for-parameter
     cli_app()
