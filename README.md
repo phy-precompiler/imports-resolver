@@ -30,39 +30,43 @@ pip install phy-imports-resolver[cli]
 Suppose the layout of your python project is:
 
 ```shell
-my_project/
-├── file1.py
-├── file2.py
-├── pkg1.py
-│   ├── file3.py
-│   └── __init__.py
-└── __init__.py
+src/
+├──my_project/
+│  ├──file1.py
+│  ├──file2.py
+│  ├──pkg1.py
+│  │  ├── file3.py
+│  │  └── __init__.py
+│  └──__init__.py
+└──script1.py
 ```
 
 To resolve the imports tree: 
 
 + Firstly you MUST specify a root directory named `project_dir` to search within; in this case, 
-it is `my_project`. If `project_dir` is not explicitly provided, current directory is used.
+it is `src`. If `project_dir` is not explicitly provided, current directory is used.
 
 + An entry file path is also required as the start point for the resolver to search from. If you want to resolve from 
 a package instead a file, use the `__init__.py` file of the package as the entry file.
 
-With the required arguments, call the `resolve(entry_file)` method:
+In this case, if `script1.py` is the entry file to resolve, call the `resolve(entry_file)` method:
 
 ```python
 import phy_imports_resolver
+from pathlib import Path
+
+project_dir = Path('./src')
+entry_file = project_dir / 'script1.py'
+
 mod_imports_node = phy_imports_resolver.resolve(entry_file, project_dir)
 ```
 
-where `mod_imports_node` is a `ModuleImportsNode` object, which represents a file module or sub package in a hierarchical tree structure of importing relationship. See the definition of `ModuleImportsNode`:
+The result `mod_imports_node` is a `ModuleImportsNode` object, which represents a file module or sub package in a hierarchical tree structure of importing relationship. See the definition of `ModuleImportsNode`:
 
 ```python
 class ModuleImportsNode:
-    # instance attributes
-    mod: Module
-    project_dir: Path
-    imports: List['ModuleImportsNode']
-    code: Optional[str]
+    def __init__(self, mod, project_dir, imports: List['ModuleImportsNode'], **kwargs):
+      ...
 ```
 
 where attribute `mod` stands for the file or package itself, and list attribute `imports` holds other modules imported to itself.
@@ -74,11 +78,16 @@ The complete API docs can be found [here](./docs/module.md).
 ### use the CLI
 
 ```shell
-Usage: phy-resolve-imports resolve-imports [OPTIONS] FILE
+Usage: phy-resolve-imports [OPTIONS] FILE
 
-  Resolve imports from entry code file.
+  Resolve the imports of a python file or module, recursively.
 
   FILE: path to the entry code file.
+
+Options:
+  -f, --format [xml|png|svg]  Specify the output format  [default: xml]
+  -o, --output PATH           Optional output file path.
+  --help                      Show this message and exit.
 ```
 
 For the CLI, current work directory will be used as the root directory to search within.
