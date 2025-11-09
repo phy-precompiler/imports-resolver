@@ -1,4 +1,4 @@
-# PHY-resolve-imports
+# PHY-imports-resolver
 
 <p align="left">
   <a href="#"><img alt="PyPI" src="https://img.shields.io/pypi/v/phy-imports-resolver.svg"></a>
